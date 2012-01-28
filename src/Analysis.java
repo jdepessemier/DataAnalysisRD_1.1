@@ -18,8 +18,8 @@ public class Analysis {
 		// Setup the minimal lateral roots length, below this value we do not consider the lateral or
 		// secondary root
 		
-		String root = "Z:";
-		String workDir = "W_2011_09_21";
+		String root = "C:";
+		String workDir = "W_2012_01_23";
 		//String workDir = "W_2011_All_In_One";
 		Double minLateralRootLength = 0.1;
 		
@@ -48,8 +48,8 @@ public class Analysis {
 			    //System.out.println(accession);
 			    
 			    // Build the different file names
-			    // String inputFileName = inputDir+accession+".bmp.txt";
-			    String inputFileName = inputDir+accession+".txt";
+			    String inputFileName = inputDir+accession+".bmp.txt";
+			    //String inputFileName = inputDir+accession+".txt";
 				String cleanupFileName = cleanupDir+accession+".txt";
 				String outputFileName = outputDir+accession+".csv";
 				
@@ -83,12 +83,14 @@ public class Analysis {
 			accessionsNameList = getUniqueAccessionsNames(accessionsList);
 			
 			// Write sorted output files
-			writeFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList);
-			writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
+			writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
+			//writeFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList);
+			//writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
 			
 			// Write corrected output files
-			writeCorrectedFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList,globalMeans);
-			writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
+			writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
+			//writeCorrectedFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList,globalMeans);
+			//writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
 			    
 		}				
 	}
