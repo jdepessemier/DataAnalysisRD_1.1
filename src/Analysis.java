@@ -19,7 +19,7 @@ public class Analysis {
 		// secondary root
 		
 		String root = "C:";
-		String workDir = "W_2012_01_23";
+		String workDir = "W_2012_04_04";
 		//String workDir = "W_2011_All_In_One";
 		Double minLateralRootLength = 0.1;
 		
@@ -83,14 +83,14 @@ public class Analysis {
 			accessionsNameList = getUniqueAccessionsNames(accessionsList);
 			
 			// Write sorted output files
-			writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
-			//writeFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList);
-			//writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
+			//writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
+			writeFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList);
+			writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
 			
 			// Write corrected output files
-			writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
-			//writeCorrectedFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList,globalMeans);
-			//writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
+			//writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
+			writeCorrectedFilesPerConcentration(finalDir,"10然",accessionsNameList,accessionsList,globalMeans);
+			writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
 			    
 		}				
 	}
@@ -435,6 +435,7 @@ public class Analysis {
 	    
 	    // Calculate the standard deviations
 	    Double mainRootLengthSD = sdDouble(mainrootlength);
+	    //System.out.println(mainRootLengthSD);
 	    parsedaccession.setMRLsd(mainRootLengthSD);
 	    Double nbOfLateralRootsSD = sdInt(nboflateralroots);
 	    parsedaccession.setNLRsd(nbOfLateralRootsSD);
