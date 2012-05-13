@@ -19,7 +19,7 @@ public class Analysis {
 		// secondary root
 		
 		String root = "C:";
-		String workDir = "W_2012_04_04";
+		String workDir = "W_2012_05_12";
 		//String workDir = "W_2011_All_In_One";
 		Double minLateralRootLength = 0.1;
 		
@@ -61,7 +61,8 @@ public class Analysis {
 				// Build a .csv file for each accession containing the extracted data
 				inFile = new File(cleanupFileName);
 				Accession myAccession = new Accession();
-				myAccession = parse(inFile,outputFileName,minLateralRootLength);			    
+				myAccession = parse(inFile,outputFileName,minLateralRootLength);
+				//System.out.println(myAccession.getAccessionName());
 			    accessionsList.add(myAccession);
 			    
 		    }		    
@@ -78,20 +79,45 @@ public class Analysis {
 		    Double[] globalMeans = new Double[4];
 		    globalMeans = writeFile2(outFileName,accessionsList);
 		    	    
-			// Determine the unique Accessions names
+			// Write sorted output files	    
 			List<String> accessionsNameList = new ArrayList<String>();
-			accessionsNameList = getUniqueAccessionsNames(accessionsList);
-			
-			// Write sorted output files
-			//writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
+			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10µM");
+			//System.out.println(accessionsNameList.size());
+			//for (int l = 1; l < accessionsNameList.size(); l++ ){
+			//	System.out.println(accessionsNameList.get(l));
+			//}
 			writeFilesPerConcentration(finalDir,"10µM",accessionsNameList,accessionsList);
+			
+			accessionsNameList = new ArrayList<String>();
+			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10mM");
+			//System.out.println(accessionsNameList.size());
+			//for (int l = 1; l < accessionsNameList.size(); l++ ){
+			//	System.out.println(accessionsNameList.get(l));
+			//}
 			writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
 			
-			// Write corrected output files
-			//writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
+			//accessionsNameList = new ArrayList<String>();
+			//accessionsNameList = getUniqueAccessionsNames(accessionsList,"-");
+			//System.out.println(accessionsNameList.size());
+			//writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
+			
+			// Write corrected output files		
+			accessionsNameList = new ArrayList<String>();
+			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10µM");
+			//System.out.println(accessionsNameList.size());
 			writeCorrectedFilesPerConcentration(finalDir,"10µM",accessionsNameList,accessionsList,globalMeans);
+			
+			accessionsNameList = new ArrayList<String>();
+			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10mM");
+			//System.out.println(accessionsNameList.size());
 			writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
-			    
+			 
+			//accessionsNameList = new ArrayList<String>();
+			//accessionsNameList = getUniqueAccessionsNames(accessionsList,"-");
+			//System.out.println(accessionsNameList.size());
+			//writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
+
+			
 		}				
 	}
 
@@ -720,145 +746,197 @@ public class Analysis {
 			Double[] array3 = moveToArray(SLRLmeanA,SLRLmeanB,SLRLmeanC,SLRLmeanD);
 			Double[] array4 = moveToArray(RDmeanA,RDmeanB,RDmeanC,RDmeanD);
 
+			//System.out.println(array1.length+" "+array2.length+" "+array3.length+" "+array4.length);
+			
+			// calculate the different mean values for accessions A,B,C,D
+
+			Double MRLmean,NLRmean,SLRLmean,RDmean;
+			
 			if (array1.length != 0){
-				
-				// calculate the different mean values for accessions A,B,C,D
-				Double MRLmean,NLRmean,SLRLmean,RDmean;
 				
 				if (array1.length == 1){
 					MRLmean = array1[0];
 				} else {
 					MRLmean = roundDouble(meanDouble(array1),"#.##");
 				}
-
+			} else {
+				MRLmean = 0.00;
+			}
+			
+			if (array2.length != 0){
+				
 				if (array2.length == 1){
 					NLRmean = array2[0];
 				} else {
 					NLRmean = roundDouble(meanDouble(array2),"#.##");
 				}
+			} else {
+				NLRmean = 0.00;
+			}
 
+			if (array3.length != 0){
+				
 				if (array3.length == 1){
 					SLRLmean = array3[0];
 				} else {
 					SLRLmean = roundDouble(meanDouble(array3),"#.##");
 				}
+			} else {
+				SLRLmean = 0.00;
+			}
+
+			if (array4.length != 0){
 				
 				if (array4.length == 1){
 					RDmean = array4[0];
 				} else {
 					RDmean = roundDouble(meanDouble(array4),"#.##");
 				}				
-				
-				// Write the Mean values in the file
-				source = ""+";"+
-		         		 ""+";"+
-		         		 ""+";"+
-		         		 ""+";"+
-		         		 "Mean"+";"+
-		         		 roundDouble(MRLmean,"#.##")+";"+
-		         		 roundDouble(NLRmean,"#.##")+";"+
-		         		 roundDouble(SLRLmean,"#.##")+";"+
-		 		 		 roundDouble(RDmean,"#.##")+"\r\n";
+			} else {
+				RDmean = 0.00;
+			}			
+			
+			// Write the Mean values in the file
+			source = ""+";"+
+		         	 ""+";"+
+		         	 ""+";"+
+		         	 ""+";"+
+		         	 "Mean"+";"+
+		         	 roundDouble(MRLmean,"#.##")+";"+
+		         	 roundDouble(NLRmean,"#.##")+";"+
+		         	 roundDouble(SLRLmean,"#.##")+";"+
+		 		 	 roundDouble(RDmean,"#.##")+"\r\n";
 					
-				String newSource = source.replace(".", ",");			    
-				f1.write(newSource);
+			String newSource = source.replace(".", ",");			    
+			f1.write(newSource);
 				
-				// calculate the different SD values for accessions A,B,C,D
-				Double MRLsd,NLRsd,SLRLsd,RDsd;
-				
+			// calculate the different SD values for accessions A,B,C,D
+			Double MRLsd,NLRsd,SLRLsd,RDsd;
+			
+			if (array1.length != 0){
 				if (array1.length == 1){
 					MRLsd = 0.00;
 				} else {
 					MRLsd = roundDouble(sdDouble(array1),"#.##");
 				}
+			} else {
+				MRLsd = 0.00;
+			}
 
+			if (array2.length != 0){
 				if (array2.length == 1){
 					NLRsd = 0.00;
 				} else {
 					NLRsd = roundDouble(sdDouble(array2),"#.##");
 				}
-
+			} else {
+				NLRsd = 0.00;
+			}	
+			
+			if (array3.length != 0){
 				if (array3.length == 1){
 					SLRLsd = 0.00;
 				} else {
 					SLRLsd = roundDouble(sdDouble(array3),"#.##");
 				}
-
+			} else {
+				SLRLsd = 0.00;
+			}
+				
+			if (array4.length != 0){
 				if (array4.length == 1){
 					RDsd = 0.00;
 				} else {
 					RDsd = roundDouble(sdDouble(array4),"#.##");
 				}
+			} else {
+				RDsd = 0.00;
+			}
+			
+			// Write the SD values in the file
+			source = ""+";"+
+	    	 		 ""+";"+
+	    	 		 ""+";"+
+	    	 		 ""+";"+
+	    	 		 "SD"+";"+
+	    	 		 roundDouble(MRLsd,"#.##")+";"+
+	    	 		 roundDouble(NLRsd,"#.##")+";"+
+	    	 		 roundDouble(SLRLsd,"#.##")+";"+
+		 	 		 roundDouble(RDsd,"#.##")+"\r\n";
 				
-				// Write the SD values in the file
-				source = ""+";"+
-	    		 		 ""+";"+
-	    		 		 ""+";"+
-	    		 		 ""+";"+
-	    		 		 "SD"+";"+
-	    		 		 roundDouble(MRLsd,"#.##")+";"+
-	    		 		 roundDouble(NLRsd,"#.##")+";"+
-	    		 		 roundDouble(SLRLsd,"#.##")+";"+
-		 		 		 roundDouble(RDsd,"#.##")+"\r\n";
-					
-				newSource = source.replace(".", ",");			    
-				f1.write(newSource);
+			newSource = source.replace(".", ",");			    
+			f1.write(newSource);
 
-				// calculate the different SE values for accessions A,B,C,D
-				Double MRLse,NLRse,SLRLse,RDse;
-				
+			// calculate the different SE values for accessions A,B,C,D
+			Double MRLse,NLRse,SLRLse,RDse;
+			
+			if (array1.length != 0){
 				if (array1.length == 1){
 					MRLse = 0.00;
 				} else {
 					MRLse = roundDouble((MRLsd/Math.sqrt(array1.length-1)),"#.##");
 				}
+			} else {
+				MRLse = 0.00;
+			}
 
+			if (array2.length != 0){	
 				if (array2.length == 1){
 					NLRse = 0.00;
 				} else {
 					NLRse = roundDouble((NLRsd/Math.sqrt(array2.length-1)),"#.##");
 				}
+			} else {
+				NLRse = 0.00;
+			}
 
+			if (array3.length != 0){
 				if (array3.length == 1){
 					SLRLse = 0.00;
 				} else {
 					SLRLse = roundDouble((SLRLsd/Math.sqrt(array3.length-1)),"#.##");
 				}
-
+			} else {
+				SLRLse = 0.00;
+			}
+				
+			if (array4.length != 0){
 				if (array4.length == 1){
 					RDse = 0.00;
 				} else {
 					RDse = roundDouble((RDsd/Math.sqrt(array4.length-1)),"#.##");
 				}
-				
-				// Write the SE values in the file
-				
-				source = ""+";"+
-					     ""+";"+
-					     ""+";"+
-					     ""+";"+
-					     "SE"+";"+
-					     roundDouble(MRLse,"#.##")+";"+
-					     roundDouble(NLRse,"#.##")+";"+
-					     roundDouble(SLRLse,"#.##")+";"+
-					 	 roundDouble(RDse,"#.##")+"\r\n";
-
-				newSource = source.replace(".", ",");			    
-				f1.write(newSource);
-				
-				// Write the data in the second file
-
-				source = accessionnames.get(i)+";"+
-						 concentration+";"+
-						 roundDouble(MRLmean,"#.##")+";"+"±"+";"+roundDouble(MRLse,"#.##")+";"+
-						 roundDouble(NLRmean,"#.##")+";"+"±"+";"+roundDouble(NLRse,"#.##")+";"+
-						 roundDouble(SLRLmean,"#.##")+";"+"±"+";"+roundDouble(SLRLse,"#.##")+";"+
-				 		 roundDouble(RDmean,"#.##")+";"+"±"+";"+roundDouble(RDse,"#.##")+";"+"\r\n";
-
-				newSource = source.replace(".", ",");			    
-				f2.write(newSource);
-								
+			} else {
+				RDse = 0.00;
 			}
+
+			// Write the SE values in the file
+				
+			source = ""+";"+
+				     ""+";"+
+				     ""+";"+
+				     ""+";"+
+				     "SE"+";"+
+				     roundDouble(MRLse,"#.##")+";"+
+				     roundDouble(NLRse,"#.##")+";"+
+				     roundDouble(SLRLse,"#.##")+";"+
+				 	 roundDouble(RDse,"#.##")+"\r\n";
+
+			newSource = source.replace(".", ",");			    
+			f1.write(newSource);
+				
+			// Write the data in the second file
+
+			source = accessionnames.get(i)+";"+
+					 concentration+";"+
+					 roundDouble(MRLmean,"#.##")+";"+"±"+";"+roundDouble(MRLse,"#.##")+";"+
+					 roundDouble(NLRmean,"#.##")+";"+"±"+";"+roundDouble(NLRse,"#.##")+";"+
+					 roundDouble(SLRLmean,"#.##")+";"+"±"+";"+roundDouble(SLRLse,"#.##")+";"+
+			 		 roundDouble(RDmean,"#.##")+";"+"±"+";"+roundDouble(RDse,"#.##")+";"+"\r\n";
+
+			newSource = source.replace(".", ",");			    
+			f2.write(newSource);
+								
 		}		
 		f1.close();
 		f2.close();
@@ -1265,6 +1343,7 @@ public class Analysis {
     static Double roundDouble(Double d, String decimalformat) {
     	
     	// This routine takes a double as input an returns a rounded double based on the format
+    	//System.out.println(d);
     	
     	DecimalFormat twoDForm = new DecimalFormat(decimalformat);
 	return Double.valueOf(twoDForm.format(d).replace(",", "."));
@@ -1379,24 +1458,46 @@ public class Analysis {
     return Math.sqrt( sum / ( n - 1 ) );
     }
 
-    static List<String> getUniqueAccessionsNames(List<Accession> list) {
+    static List<String> getUniqueAccessionsNames(List<Accession> list, String concentration) {
     	
-    	// This routines returns a list with unique accession names
+    	// This routines returns a list with unique accession names per concentration
     	
     	List<String> uniqueNames = new ArrayList<String>();
-    
-    	String currentName = list.get(0).getAccessionName();
-    	uniqueNames.add(currentName);
-    	
-    	for (int i=1; i<list.size(); i++) {
-    		if (!currentName.equals(list.get(i).getAccessionName())) {
-    			currentName = list.get(i).getAccessionName();
+       	
+    	for (int i=0; i<list.size(); i++) {
+    		String currentName = list.get(i).getAccessionName();
+    		String currentConcentration = list.get(i).getConcentration();    		
+    		if (currentConcentration.equals(concentration)) {
+    			if (!uniqueNames.contains(currentName)){
     			uniqueNames.add(currentName);
+    			//System.out.println(currentName);
+    			}
     		}
     	}	    	    	
         return uniqueNames;
     }    
 
+//    static List<String> getUniqueAccessionsNames(List<Accession> list) {
+//    	
+//    	// This routines returns a list with unique accession names
+//    	
+//    	List<String> uniqueNames = new ArrayList<String>();
+//    
+//    	String currentName = list.get(0).getAccessionName();
+//    	uniqueNames.add(currentName);
+//    	//System.out.println(currentName);
+//    	
+//    	for (int i=1; i<list.size(); i++) {
+//    		if (!currentName.equals(list.get(i).getAccessionName())) {
+//    			currentName = list.get(i).getAccessionName();
+//    			//System.out.println(currentName);
+//    			uniqueNames.add(currentName);
+//    		}
+//    	}	    	    	
+//        return uniqueNames;
+//    }    
+
+    
     static Double[] moveToArray(Double value1, Double value2, Double value3, Double value4) {
     	
     	// Moves the 4 Doubles received as input into one array
