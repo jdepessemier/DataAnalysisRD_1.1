@@ -1,11 +1,13 @@
 public class Accession {
 	
-	private String experimentName;
-	private String accessionName;
+	private String name;
 	private String concentration;
 	private String box;
-	private String boxName;
 	private int nbOfPlants;
+	private Double[] MRL = new Double[5];
+	private int[] NLR = new int[5];
+	private Double[] SLRL = new Double[5];
+	private Double[] RD = new Double[5];
 	
 	// Main Root Length (MRL) mean, standard deviation, and standard error
 	private Double MRLmean;
@@ -28,12 +30,18 @@ public class Accession {
 	private Double RDse;
 	
 	public Accession() {
-		experimentName = "";
-		accessionName = "";
+		name = "";
 		concentration = "";
 		box = "";
-		boxName = "";
 		nbOfPlants = 0;
+		
+		for (int i=0; i<4; i++) {
+			MRL[i] = 0.00;
+			NLR[i] = 0;
+			SLRL[i] = 0.00;
+			RD[i] = 0.00;
+		}
+		
 		MRLmean = 0.00;
 		MRLsd = 0.00;
 		MRLse = 0.00;
@@ -48,12 +56,14 @@ public class Accession {
 		RDse = 0.00;		
 	}
 	
-	public Accession(String experimentname,
-					 String accessionname,
+	public Accession(String name,
 					 String concentration,
 					 String box,
-					 String boxname,
 					 int nbofplants,
+					 Double[] mrl,
+					 int[] nlr,
+					 Double[] slrl,
+					 Double[] rd,
 					 Double mainrootlengthmean,
 					 Double mainrootlengthsd,
 					 Double mainrootlengthse,
@@ -66,12 +76,14 @@ public class Accession {
 					 Double rootsdensitymean,
 					 Double rootsdensitysd,
 					 Double rootsdensityse) {
-		this.experimentName = experimentname;
-		this.accessionName = accessionname;
+		this.name = name;
 		this.concentration = concentration;
 		this.box = box;
-		this.boxName = boxname;
 		this.nbOfPlants = nbofplants;
+		this.MRL = mrl;
+		this.NLR = nlr;
+		this.SLRL = slrl;
+		this.RD = rd;		
 		this.MRLmean = mainrootlengthmean;
 		this.MRLsd = mainrootlengthsd;
 		this.MRLse = mainrootlengthse;
@@ -86,24 +98,14 @@ public class Accession {
 		this.RDse = rootsdensityse;
 	}
 
-	// Experiment Name
-	
-	public String getExperimentName() {
-		return experimentName;
-	}
-
-	public void setExperimentName(String value) {
-		experimentName = value;
-	}
-
 	// Accession Name
 	
-	public String getAccessionName() {
-		return accessionName;
+	public String getName() {
+		return name;
 	}
 
-	public void setAccessionName(String value) {
-		accessionName = value;
+	public void setName(String value) {
+		name = value;
 	}
 
 	// Concentration
@@ -126,16 +128,6 @@ public class Accession {
 		box = value;
 	}
 
-	// Box Name
-	
-	public String getBoxName() {
-		return boxName;
-	}
-
-	public void setBoxName(String value) {
-		boxName = value;
-	}
-
 	// Number of Plants
 	
 	public int getNbOfPlants() {
@@ -144,6 +136,46 @@ public class Accession {
 
 	public void setNbOfPlants(int value) {
 		nbOfPlants = value;
+	}
+	
+	// MRL
+	
+	public Double getMRL(int idx) {
+		return MRL[idx];
+	}
+
+	public void setMRL(double value, int idx) {
+		MRL[idx] = value;
+	}
+	
+	// NLR
+	
+	public int getNLR(int idx) {
+		return NLR[idx];
+	}
+
+	public void setNLR(int value, int idx) {
+		NLR[idx] = value;
+	}
+	
+	// SLRL
+	
+	public Double getSLRL(int idx) {
+		return SLRL[idx];
+	}
+
+	public void setSLRL(double value, int idx) {
+		SLRL[idx] = value;
+	}
+
+	// RD
+	
+	public Double getRD(int idx) {
+		return RD[idx];
+	}
+
+	public void setRD(double value, int idx) {
+		RD[idx] = value;
 	}
 
 	// Main Root Length

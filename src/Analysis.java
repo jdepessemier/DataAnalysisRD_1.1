@@ -19,8 +19,7 @@ public class Analysis {
 		// secondary root
 		
 		String root = "C:";
-		String workDir = "W_2012_05_12";
-		//String workDir = "W_2011_All_In_One";
+		String workDir = "W_2012_03_08";
 		Double minLateralRootLength = 0.1;
 		
 		// Setup the working directories inside the main directory
@@ -76,47 +75,8 @@ public class Analysis {
 		    // globalMeans[2] is for the Sum of Lateral Roots Length
 		    // globalMeans[3] is for the roots Density
 		    
-		    Double[] globalMeans = new Double[4];
-		    globalMeans = writeFile2(outFileName,accessionsList);
-		    	    
-			// Write sorted output files	    
-			List<String> accessionsNameList = new ArrayList<String>();
-			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10µM");
-			//System.out.println(accessionsNameList.size());
-			//for (int l = 1; l < accessionsNameList.size(); l++ ){
-			//	System.out.println(accessionsNameList.get(l));
-			//}
-			writeFilesPerConcentration(finalDir,"10µM",accessionsNameList,accessionsList);
-			
-			accessionsNameList = new ArrayList<String>();
-			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10mM");
-			//System.out.println(accessionsNameList.size());
-			//for (int l = 1; l < accessionsNameList.size(); l++ ){
-			//	System.out.println(accessionsNameList.get(l));
-			//}
-			writeFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList);
-			
-			//accessionsNameList = new ArrayList<String>();
-			//accessionsNameList = getUniqueAccessionsNames(accessionsList,"-");
-			//System.out.println(accessionsNameList.size());
-			//writeFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList);
-			
-			// Write corrected output files		
-			accessionsNameList = new ArrayList<String>();
-			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10µM");
-			//System.out.println(accessionsNameList.size());
-			writeCorrectedFilesPerConcentration(finalDir,"10µM",accessionsNameList,accessionsList,globalMeans);
-			
-			accessionsNameList = new ArrayList<String>();
-			accessionsNameList = getUniqueAccessionsNames(accessionsList,"10mM");
-			//System.out.println(accessionsNameList.size());
-			writeCorrectedFilesPerConcentration(finalDir,"10mM",accessionsNameList,accessionsList,globalMeans);
-			 
-			//accessionsNameList = new ArrayList<String>();
-			//accessionsNameList = getUniqueAccessionsNames(accessionsList,"-");
-			//System.out.println(accessionsNameList.size());
-			//writeCorrectedFilesPerConcentration(finalDir,"-",accessionsNameList,accessionsList,globalMeans);
-
+//		    Double[] globalMeans = new Double[4];
+//		    globalMeans = writeFile2(outFileName,accessionsList);		    	    
 			
 		}				
 	}
@@ -165,9 +125,12 @@ public class Analysis {
 		
 		// variables to store the accessions data
 		String fileName;
-		String experimentName;
-		String boxName;
-		int nbOfPlants;
+		String userName; // should be empty
+		String experimentName; // should be empty
+		String boxName; // should contain a letter for the box name
+		String genotype; // used to store the accession name
+		String media; // used to store the concentration
+		int nbOfPlants; // self explanatory
 
 	    Accession currentAccession = new Accession();
 	    Accession parsedAccession = new Accession();
@@ -179,57 +142,28 @@ public class Analysis {
 		    
 		    while (dis.available() != 0) {
 		    	
-		    	// Get the accession file name, we only take the text before the .bmp
 		    	String line = dis.readLine();
-		    	//System.out.println(line);
-			    
-			    // skip line with user name
-			    dis.readLine();
-			    
-			    // Get the accession experiment name
+		    	fileName = getStringLineItem(line,1,";");
+		    	
 			    line = dis.readLine();
-			    //System.out.println(line);
+			    userName = getStringLineItem(line,1,";");
+			    
+			    line = dis.readLine();
 			    experimentName = getStringLineItem(line,1,";");
-			    //System.out.println(experimentName);
-			    currentAccession.setExperimentName(experimentName);
-			    //System.out.println(experimentName);
-			    
-			    // Extract the accession name, the concentration, the box out of the experiment name
-			    
-			    String str1 = experimentName;
-			    //System.out.println(str1);
-			    String str11 = str1.replace(" ", ";");
-			    //System.out.println(str11);
-		    	String[] fields11 = str11.split(";");
-		    	
-		    	String currentAccessionName;
-		    	String currentConcentration;
-		    	String currentBox;
-		    	
-		    	//System.out.println(fields11.length);
-		    	
-		    	if (fields11.length == 3){
-		    		currentAccessionName = fields11[0].toUpperCase();
-		    		currentConcentration = fields11[1];
-		    		currentBox = fields11[2].toUpperCase();
-		    	} else {
-		    		currentAccessionName = fields11[0].toUpperCase()+" "+fields11[1].toUpperCase();
-		    		currentConcentration = fields11[2];
-		    		currentBox = fields11[3].toUpperCase();
-		    	}
-		    	currentAccession.setAccessionName(currentAccessionName);
-		    	currentAccession.setConcentration(currentConcentration);
-		    	currentAccession.setBox(currentBox);
-			    
-			    // Get the accession box name
+		    			    				    
 			    line = dis.readLine();
 			    boxName = getStringLineItem(line,1,";");
-			    currentAccession.setBoxName(boxName);
-			    //System.out.println(boxName);
+			    currentAccession.setBox(boxName);
 			     
-			    // skip lines with Genotype,Media, Age of Plants
-			    dis.readLine();
-			    dis.readLine();
+			    line = dis.readLine();
+			    genotype = getStringLineItem(line,1,";");
+			    currentAccession.setName(genotype);
+
+			    line = dis.readLine();
+			    media = getStringLineItem(line,1,";");
+			    currentAccession.setConcentration(media);
+			    
+			    // skip lines with Age of Plants
 			    dis.readLine();
 			    
 			    // Get the accession number of plants
@@ -264,6 +198,7 @@ public class Analysis {
 			    	// Get the Main root length
 			    	line = dis.readLine();
 			    	mainRootLength[i] = getDoubleLineItem(line,1,";");
+				    currentAccession.setMRL(mainRootLength[i],i);
 				    //System.out.println(roundDouble(rootLength[i]));
 				    
 			    	// Skip lines with Main root vector, Main root angle
@@ -273,6 +208,7 @@ public class Analysis {
 				    // Get the Number lateral root(s)
 				    line = dis.readLine();
 				    nbOfLateralRoots[i] = getIntegerLineItem(line,1,";");
+				    currentAccession.setNLR(nbOfLateralRoots[i],i);
 				    
 				    // We will now get the length of each lateral root and of its secondary roots
 				    // we will sum those lengths only for roots having a length greater than a 
@@ -312,6 +248,7 @@ public class Analysis {
 					    			//System.out.println(rootLength);
 					    			if (rootLength <= minlateralrootlength){
 					    				nbOfLateralRoots[i] = nbOfLateralRoots[i] -1;
+					    				currentAccession.setNLR(nbOfLateralRoots[i],i);
 					    			}
 					    			//System.out.println(nbOfLateralRoots[i]);
 					    			if (rootLength > minlateralrootlength){
@@ -356,16 +293,20 @@ public class Analysis {
 				    
 				    // Save the value for the current root
 				    sumOfLatRootsLength[i]=lateralRootsLenghSum;
+				    currentAccession.setSLRL(sumOfLatRootsLength[i],i);
 				    //System.out.println(roundDouble(sumOfLatRootsLength[i]));
 
 				    // Save the roots density
 				    //System.out.println(nbOfLateralRoots[i]);
 				    if (nbOfLateralRoots[i] == 0) {
 				    	rootsDensity[i] = 0.00; // There are no lateral roots
+				    	currentAccession.setRD(rootsDensity[i],i);
 				    } else if (nbOfLateralRoots[i] == 1) {
 				    	rootsDensity[i] = 1/mainRootLength[i]; // Only one lateral root
+				    	currentAccession.setRD(rootsDensity[i],i);
 				    } else {
 				    	rootsDensity[i] = nbOfLateralRoots[i]/rootDeltaLength;
+				    	currentAccession.setRD(rootsDensity[i],i);
 				    }
 				    //System.out.println(rootsDensity[i]);
 				    
@@ -378,8 +319,9 @@ public class Analysis {
 			    // write the output file		    
 			    parsedAccession = writeFile(currentAccession,
 			    							outputfilename,
-			    		  				    experimentName,
 			    		  				    boxName,
+			    		  				    genotype,
+			    		  				    media,
 			    		  				    nbOfPlants,
 			    		  				    mainRootLength,
 			    		  				    nbOfLateralRoots,
@@ -401,906 +343,187 @@ public class Analysis {
 	}
 	
 	private static Accession writeFile(Accession parsedaccession,
-			                           String outputfilename,
-							 	  	   String experimentname,
-							 	  	   String boxname,
-							 	  	   int nbofplants,
-							 	  	   Double[] mainrootlength,
-							 	  	   int[] nboflateralroots,
-							 	  	   Double[] sumoflatrootslength,
-							 	  	   Double[] rootsdensity) throws IOException{
-		
-	    FileWriter f1 = new FileWriter(outputfilename);
-	    
-	    // Write first line with the columns titles
-	    String source = "Experiment Name"+";"+
-	    				"Box Name"+";"+
-	    				"Nb of Plants"+";"+
-	    				"Main Root Length"+";"+";"+
-	    				"Nb of Lateral Roots"+";"+";"+
-	    				"Sum of Lateral Roots Length"+";"+";"+
-						"Roots Density"+"\r\n";	    
-	    f1.write(source);
-	    
-	    // Write the second line, for this line we write the file name, the experiment name, 
-	    // the box name and the number of plants. This will not repeated for the next plants.
-	    source = experimentname+";"+
-	    		 boxname+";"+
-	    		 nbofplants+";"+
-	    		 roundDouble(mainrootlength[0],"#.##")+";"+";"+
-	    		 nboflateralroots[0]+";"+";"+
-	    		 roundDouble(sumoflatrootslength[0],"#.##")+";"+";"+
-		 		 roundDouble(rootsdensity[0],"#.##")+"\r\n";
-	    
-	    // Just to make sure the numbers are OK for Excel
-	    String newSource = source.replace(".", ",");			    
-	    f1.write(newSource);
-	    
-	    // we will now write the following lines based on the number of plants
-	    for (int l = 1; l < nbofplants; l++ ){
-	    	
-	    	source = ";"+";"+";"+
-					 roundDouble(mainrootlength[l],"#.##")+";"+";"+
-					 nboflateralroots[l]+";"+";"+
-					 roundDouble(sumoflatrootslength[l],"#.##")+";"+";"+
-	    			 roundDouble(rootsdensity[l],"#.##")+"\r\n";
-	    	
-	    	newSource = source.replace(".", ",");    	
-	    	f1.write(newSource);	    	
-	    }
-	    
-	    // Calculate the means
-	    Double mainRootLengthMean = meanDouble(mainrootlength);
-	    parsedaccession.setMRLmean(mainRootLengthMean);
-	    Double nbOfLateralRootsMean = meanInt(nboflateralroots);
-	    parsedaccession.setNLRmean(nbOfLateralRootsMean);
-	    Double sumOfLatRootsLengthMean = meanDouble(sumoflatrootslength);
-	    parsedaccession.setSLRLmean(sumOfLatRootsLengthMean);
-	    Double rootsDensityMean = meanDouble(rootsdensity);
-	    parsedaccession.setRDmean(rootsDensityMean);
-	    
-	    // Calculate the standard deviations
-	    Double mainRootLengthSD = sdDouble(mainrootlength);
-	    //System.out.println(mainRootLengthSD);
-	    parsedaccession.setMRLsd(mainRootLengthSD);
-	    Double nbOfLateralRootsSD = sdInt(nboflateralroots);
-	    parsedaccession.setNLRsd(nbOfLateralRootsSD);
-	    Double sumOfLatRootsLengthSD = sdDouble(sumoflatrootslength);
-	    parsedaccession.setSLRLsd(sumOfLatRootsLengthSD);
-	    Double rootsDensitySD = sdDouble(rootsdensity);
-	    parsedaccession.setRDsd(rootsDensitySD);	    
-	    
-	    // Calculate the standard errors
-	    Double mainRootLengthSE = mainRootLengthSD/Math.sqrt(nbofplants-1);
-	    parsedaccession.setMRLse(mainRootLengthSE);
-	    Double nbOfLateralRootsSE = nbOfLateralRootsSD/Math.sqrt(nbofplants-1);
-	    parsedaccession.setNLRse(nbOfLateralRootsSE);
-	    Double sumOfLatRootsLengthSE = sumOfLatRootsLengthSD/Math.sqrt(nbofplants-1);
-	    parsedaccession.setSLRLse(sumOfLatRootsLengthSE);
-	    Double rootsDensitySE = rootsDensitySD/Math.sqrt(nbofplants-1);
-	    parsedaccession.setRDse(rootsDensitySE);
-	    
-	    // Write the line with the different mean values
-	    source = ";"+";"+"Mean;"+
-	    		 roundDouble(mainRootLengthMean,"#.##")+";"+";"+
-	    		 roundDouble(nbOfLateralRootsMean,"#.##")+";"+";"+
-	    		 roundDouble(sumOfLatRootsLengthMean,"#.##")+";"+";"+
-		 		 roundDouble(rootsDensityMean,"#.##")+"\r\n";
-		    
-	    newSource = source.replace(".", ",");
-	    f1.write(newSource);
+            String outputfilename,
+	 	  	   String boxname,
+	 	  	   String genotype,
+	 	  	   String media,
+	 	  	   int nbofplants,
+	 	  	   Double[] mainrootlength,
+	 	  	   int[] nboflateralroots,
+	 	  	   Double[] sumoflatrootslength,
+	 	  	   Double[] rootsdensity) throws IOException{
 
-	    // Write the line with the different standard deviations
-	    source = ";"+";"+"SD;"+
-		 		 roundDouble(mainRootLengthSD,"#.##")+";"+";"+
-		 		 roundDouble(nbOfLateralRootsSD,"#.##")+";"+";"+
-		 		 roundDouble(sumOfLatRootsLengthSD,"#.##")+";"+";"+
-		 		 roundDouble(rootsDensitySD,"#.##")+"\r\n";
-		    
-	    newSource = source.replace(".", ",");
-	    f1.write(newSource);
-
-	    // Write the line with the different standard errors
-	    source = ";"+";"+"SE;"+
-		 		 roundDouble(mainRootLengthSE,"#.##")+";"+";"+
-		 		 roundDouble(nbOfLateralRootsSE,"#.##")+";"+";"+
-		 		 roundDouble(sumOfLatRootsLengthSE,"#.##")+";"+";"+
-		 		 roundDouble(rootsDensitySE,"#.##")+"\r\n";
-		    
-	    newSource = source.replace(".", ",");
-	    f1.write(newSource);
-
-	    f1.close();
-	    
-	    return parsedaccession;
-	}
-
-	private static Double[] writeFile2(String outputfilename,
-	 	  	                  List<Accession> accessionlist) throws IOException{
-		
 		FileWriter f1 = new FileWriter(outputfilename);
-		
+
 		// Write first line with the columns titles
-		String source = "Experiment Name"+";"+
-						"Accession"+";"+
-						"Concentration"+";"+
-						"Box Name"+";"+
-						""+";"+
-						"Main Root Length"+";"+
-						"Nb of Lateral Roots"+";"+
-						"Sum of Lateral Roots Length"+";"+
-						"Roots Density"+"\r\n";
-		
+		String source = "Accession Name"+";"+
+					    "Box Name"+";"+
+					    "Concentration"+";"+
+					    "Nb of Plants"+";"+
+					    "Main Root Length"+";"+";"+
+					    "Nb of Lateral Roots"+";"+";"+
+					    "Sum of Lateral Roots Length"+";"+";"+
+					    "Roots Density"+"\r\n";	    
 		f1.write(source);
 
-		// Write the file lines
-		for (int i=0; i<accessionlist.size(); i++) {
-			
-			source = accessionlist.get(i).getExperimentName()+";"+
-					 accessionlist.get(i).getAccessionName()+";"+
-					 accessionlist.get(i).getConcentration()+";"+
-					 accessionlist.get(i).getBox()+";"+
-					 ""+";"+
-					 roundDouble(accessionlist.get(i).getMRLmean(),"#.##")+";"+
-					 roundDouble(accessionlist.get(i).getNLRmean(),"#.##")+";"+
-					 roundDouble(accessionlist.get(i).getSLRLmean(),"#.##")+";"+
-			 		 roundDouble(accessionlist.get(i).getRDmean(),"#.##")+"\r\n";
+		// Write the second line, for this line we write the accession name, the box name, 
+		// the concentration and the number of plants. This will not be repeated for the next plants.
+		source = genotype+";"+
+				 boxname+";"+
+				 media+";"+
+				 nbofplants+";"+
+				 roundDouble(mainrootlength[0],"#.##")+";"+";"+
+				 nboflateralroots[0]+";"+";"+
+				 roundDouble(sumoflatrootslength[0],"#.##")+";"+";"+
+				 roundDouble(rootsdensity[0],"#.##")+"\r\n";
 
-//			 accessionlist.get(i).getNbOfPlants()+";"+
+		// Just to make sure the numbers are OK for Excel
+		String newSource = source.replace(".", ",");			    
+		f1.write(newSource);
 
-			
-			// Just to make sure the numbers are OK for Excel
-			String newSource = source.replace(".", ",");			    
-			f1.write(newSource);
+		// we will now write the following lines based on the number of plants
+		for (int l = 1; l < nbofplants; l++ ){
+
+			source = ";"+";"+";"+";"+
+					roundDouble(mainrootlength[l],"#.##")+";"+";"+
+					nboflateralroots[l]+";"+";"+
+					roundDouble(sumoflatrootslength[l],"#.##")+";"+";"+
+					roundDouble(rootsdensity[l],"#.##")+"\r\n";
+
+			newSource = source.replace(".", ",");    	
+			f1.write(newSource);	    	
 		}
 
-		Double[] globalMeans = new Double[4];			   
-		globalMeans = calculateGlobalMeans(accessionlist);
-		
-		// Write a blank line
-		source = ""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+"\r\n";
-		f1.write(source);
-		
-		// Write the line with the global means
-		source = ""+";"+
-				 ""+";"+
-				 ""+";"+
-				 ""+";"+
-				 "Mean"+";"+
-				 roundDouble(globalMeans[0],"#.##")+";"+
-				 roundDouble(globalMeans[1],"#.##")+";"+
-				 roundDouble(globalMeans[2],"#.##")+";"+
-		 		 roundDouble(globalMeans[3],"#.##")+"\r\n";
-		
-		// Just to make sure the numbers are OK for Excel
-		String newSource = source.replace(".", ",");
+		// Calculate the means
+		Double mainRootLengthMean = meanDouble(mainrootlength);
+		parsedaccession.setMRLmean(mainRootLengthMean);
+		Double nbOfLateralRootsMean = meanInt(nboflateralroots);
+		parsedaccession.setNLRmean(nbOfLateralRootsMean);
+		Double sumOfLatRootsLengthMean = meanDouble(sumoflatrootslength);
+		parsedaccession.setSLRLmean(sumOfLatRootsLengthMean);
+		Double rootsDensityMean = meanDouble(rootsdensity);
+		parsedaccession.setRDmean(rootsDensityMean);
+
+		// Calculate the standard deviations
+		Double mainRootLengthSD = sdDouble(mainrootlength);
+		//System.out.println(mainRootLengthSD);
+		parsedaccession.setMRLsd(mainRootLengthSD);
+		Double nbOfLateralRootsSD = sdInt(nboflateralroots);
+		parsedaccession.setNLRsd(nbOfLateralRootsSD);
+		Double sumOfLatRootsLengthSD = sdDouble(sumoflatrootslength);
+		parsedaccession.setSLRLsd(sumOfLatRootsLengthSD);
+		Double rootsDensitySD = sdDouble(rootsdensity);
+		parsedaccession.setRDsd(rootsDensitySD);	    
+
+		// Calculate the standard errors
+		Double mainRootLengthSE = mainRootLengthSD/Math.sqrt(nbofplants-1);
+		parsedaccession.setMRLse(mainRootLengthSE);
+		Double nbOfLateralRootsSE = nbOfLateralRootsSD/Math.sqrt(nbofplants-1);
+		parsedaccession.setNLRse(nbOfLateralRootsSE);
+		Double sumOfLatRootsLengthSE = sumOfLatRootsLengthSD/Math.sqrt(nbofplants-1);
+		parsedaccession.setSLRLse(sumOfLatRootsLengthSE);
+		Double rootsDensitySE = rootsDensitySD/Math.sqrt(nbofplants-1);
+		parsedaccession.setRDse(rootsDensitySE);
+
+		// Write the line with the different mean values
+		source = ";"+";"+";"+"Mean;"+
+				roundDouble(mainRootLengthMean,"#.##")+";"+";"+
+				roundDouble(nbOfLateralRootsMean,"#.##")+";"+";"+
+				roundDouble(sumOfLatRootsLengthMean,"#.##")+";"+";"+
+				roundDouble(rootsDensityMean,"#.##")+"\r\n";
+
+		newSource = source.replace(".", ",");
 		f1.write(newSource);
-		
+
+		// Write the line with the different standard deviations
+		source = ";"+";"+";"+"SD;"+
+				roundDouble(mainRootLengthSD,"#.##")+";"+";"+
+				roundDouble(nbOfLateralRootsSD,"#.##")+";"+";"+
+				roundDouble(sumOfLatRootsLengthSD,"#.##")+";"+";"+
+				roundDouble(rootsDensitySD,"#.##")+"\r\n";
+
+		newSource = source.replace(".", ",");
+		f1.write(newSource);
+
+		// Write the line with the different standard errors
+		source = ";"+";"+";"+"SE;"+
+				roundDouble(mainRootLengthSE,"#.##")+";"+";"+
+				roundDouble(nbOfLateralRootsSE,"#.##")+";"+";"+
+				roundDouble(sumOfLatRootsLengthSE,"#.##")+";"+";"+
+				roundDouble(rootsDensitySE,"#.##")+"\r\n";
+
+		newSource = source.replace(".", ",");
+		f1.write(newSource);
+
 		f1.close();
-		return globalMeans;
+
+		return parsedaccession;
 	}
 
-	private static void writeFilesPerConcentration(String outputdir,
-												   String concentration,
-												   List<String> accessionnames,
-												   List<Accession> accessionlist) throws IOException{
-		
-		String outputfilename1 = outputdir+"Accessions_02_"+concentration+".csv";
-		String outputfilename2 = outputdir+"Accessions_03_"+concentration+".csv";
-		
-		FileWriter f1 = new FileWriter(outputfilename1);
-		FileWriter f2 = new FileWriter(outputfilename2);
-						
-		// Write first line with the columns titles for the first file
-		String source = "Experiment Name"+";"+
-						"Accession"+";"+
-						"Concentration"+";"+
-						"Box Name"+";"+
-						""+";"+
-						"Main Root Length"+";"+
-						"Nb of Lateral Roots"+";"+
-						"Sum of Lateral Roots Length"+";"+
-						"Roots Density"+"\r\n";
-		
-		f1.write(source);
-		
-		// Write first line with the columns titles for the second file
-		source = "Accession"+";"+
-				 "Concentration"+";"+
-				 "Main Root Length"+";"+";"+";"+
-				 "Nb of Lateral Roots"+";"+";"+";"+
-				 "Sum of Lateral Roots Length"+";"+";"+";"+
-		 		 "Roots Density"+";"+";"+";"+"\r\n";
-			
-		f2.write(source);
-
-		
-		for (int i=0; i<accessionnames.size(); i++) {
-
-			Double MRLmeanA = 0.00,MRLmeanB = 0.00,MRLmeanC = 0.00,MRLmeanD = 0.00;
-			Double NLRmeanA = 0.00,NLRmeanB = 0.00,NLRmeanC = 0.00,NLRmeanD = 0.00;
-			Double SLRLmeanA = 0.00,SLRLmeanB = 0.00,SLRLmeanC = 0.00,SLRLmeanD = 0.00;
-			Double RDmeanA = 0.00,RDmeanB = 0.00,RDmeanC = 0.00,RDmeanD = 0.00;
-			
-			for (int j=0; j<accessionlist.size(); j++) {
-				
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("A"))) {
-					source = accessionlist.get(j).getExperimentName()+";"+
-					 		 accessionlist.get(j).getAccessionName()+";"+
-					 		 accessionlist.get(j).getConcentration()+";"+
-					 		 accessionlist.get(j).getBox()+";"+
-					 		 ""+";"+
-					 		 roundDouble(accessionlist.get(j).getMRLmean(),"#.##")+";"+
-					 		 roundDouble(accessionlist.get(j).getNLRmean(),"#.##")+";"+
-					 		 roundDouble(accessionlist.get(j).getSLRLmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getRDmean(),"#.##")+"\r\n";
-
-//			 		 accessionlist.get(j).getNbOfPlants()+";"+
-					
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-			
-					MRLmeanA = roundDouble(accessionlist.get(j).getMRLmean(),"#.##");
-					NLRmeanA = roundDouble(accessionlist.get(j).getNLRmean(),"#.##");
-					SLRLmeanA = roundDouble(accessionlist.get(j).getSLRLmean(),"#.##");
-					RDmeanA = roundDouble(accessionlist.get(j).getRDmean(),"#.##");
-					
-					//System.out.println(MRLmeanA+" "+NLRmeanA+" "+SLRLmeanA);
-				}
-			}	
-		
-			for (int j=0; j<accessionlist.size(); j++) {
-				
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-				    (accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("B"))) {
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(accessionlist.get(j).getMRLmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getNLRmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getSLRLmean(),"#.##")+";"+
-					 		 roundDouble(accessionlist.get(j).getRDmean(),"#.##")+"\r\n";
-							
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);	
-
-					MRLmeanB = roundDouble(accessionlist.get(j).getMRLmean(),"#.##");
-					NLRmeanB = roundDouble(accessionlist.get(j).getNLRmean(),"#.##");
-					SLRLmeanB = roundDouble(accessionlist.get(j).getSLRLmean(),"#.##");
-					RDmeanB = roundDouble(accessionlist.get(j).getRDmean(),"#.##");
-
-					//System.out.println(MRLmeanB+" "+NLRmeanB+" "+SLRLmeanB);
-					
-				}
-			}	
-
-			for (int j=0; j<accessionlist.size(); j++) {
-				
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("C"))) {
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(accessionlist.get(j).getMRLmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getNLRmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getSLRLmean(),"#.##")+";"+
-					 		 roundDouble(accessionlist.get(j).getRDmean(),"#.##")+"\r\n";
-									
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-
-					MRLmeanC = roundDouble(accessionlist.get(j).getMRLmean(),"#.##");
-					NLRmeanC = roundDouble(accessionlist.get(j).getNLRmean(),"#.##");
-					SLRLmeanC = roundDouble(accessionlist.get(j).getSLRLmean(),"#.##");
-					RDmeanC = roundDouble(accessionlist.get(j).getRDmean(),"#.##");
-					
-					//System.out.println(MRLmeanC+" "+NLRmeanC+" "+SLRLmeanC);
-
-				}	
-			}
-
-			for (int j=0; j<accessionlist.size(); j++) {
-				
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("D"))) {
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(accessionlist.get(j).getMRLmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getNLRmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getSLRLmean(),"#.##")+";"+
-							 roundDouble(accessionlist.get(j).getRDmean(),"#.##")+"\r\n";
-									
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-
-					MRLmeanD = roundDouble(accessionlist.get(j).getMRLmean(),"#.##");
-					NLRmeanD = roundDouble(accessionlist.get(j).getNLRmean(),"#.##");
-					SLRLmeanD = roundDouble(accessionlist.get(j).getSLRLmean(),"#.##");
-					RDmeanD = roundDouble(accessionlist.get(j).getSLRLmean(),"#.##");
-					
-					//System.out.println(MRLmeanD+" "+NLRmeanD+" "+SLRLmeanD);
-
-				}	
-			}
-			
-//			System.out.println(MRLmeanA+" "+NLRmeanA+" "+SLRLmeanA);
-//			System.out.println(MRLmeanB+" "+NLRmeanB+" "+SLRLmeanB);
-//			System.out.println(MRLmeanC+" "+NLRmeanC+" "+SLRLmeanC);
-//			System.out.println(MRLmeanD+" "+NLRmeanD+" "+SLRLmeanD);
-//			System.out.println("---");
-
-			Double[] array1 = moveToArray(MRLmeanA,MRLmeanB,MRLmeanC,MRLmeanD);		
-			Double[] array2 = moveToArray(NLRmeanA,NLRmeanB,NLRmeanC,NLRmeanD);
-			Double[] array3 = moveToArray(SLRLmeanA,SLRLmeanB,SLRLmeanC,SLRLmeanD);
-			Double[] array4 = moveToArray(RDmeanA,RDmeanB,RDmeanC,RDmeanD);
-
-			//System.out.println(array1.length+" "+array2.length+" "+array3.length+" "+array4.length);
-			
-			// calculate the different mean values for accessions A,B,C,D
-
-			Double MRLmean,NLRmean,SLRLmean,RDmean;
-			
-			if (array1.length != 0){
-				
-				if (array1.length == 1){
-					MRLmean = array1[0];
-				} else {
-					MRLmean = roundDouble(meanDouble(array1),"#.##");
-				}
-			} else {
-				MRLmean = 0.00;
-			}
-			
-			if (array2.length != 0){
-				
-				if (array2.length == 1){
-					NLRmean = array2[0];
-				} else {
-					NLRmean = roundDouble(meanDouble(array2),"#.##");
-				}
-			} else {
-				NLRmean = 0.00;
-			}
-
-			if (array3.length != 0){
-				
-				if (array3.length == 1){
-					SLRLmean = array3[0];
-				} else {
-					SLRLmean = roundDouble(meanDouble(array3),"#.##");
-				}
-			} else {
-				SLRLmean = 0.00;
-			}
-
-			if (array4.length != 0){
-				
-				if (array4.length == 1){
-					RDmean = array4[0];
-				} else {
-					RDmean = roundDouble(meanDouble(array4),"#.##");
-				}				
-			} else {
-				RDmean = 0.00;
-			}			
-			
-			// Write the Mean values in the file
-			source = ""+";"+
-		         	 ""+";"+
-		         	 ""+";"+
-		         	 ""+";"+
-		         	 "Mean"+";"+
-		         	 roundDouble(MRLmean,"#.##")+";"+
-		         	 roundDouble(NLRmean,"#.##")+";"+
-		         	 roundDouble(SLRLmean,"#.##")+";"+
-		 		 	 roundDouble(RDmean,"#.##")+"\r\n";
-					
-			String newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-				
-			// calculate the different SD values for accessions A,B,C,D
-			Double MRLsd,NLRsd,SLRLsd,RDsd;
-			
-			if (array1.length != 0){
-				if (array1.length == 1){
-					MRLsd = 0.00;
-				} else {
-					MRLsd = roundDouble(sdDouble(array1),"#.##");
-				}
-			} else {
-				MRLsd = 0.00;
-			}
-
-			if (array2.length != 0){
-				if (array2.length == 1){
-					NLRsd = 0.00;
-				} else {
-					NLRsd = roundDouble(sdDouble(array2),"#.##");
-				}
-			} else {
-				NLRsd = 0.00;
-			}	
-			
-			if (array3.length != 0){
-				if (array3.length == 1){
-					SLRLsd = 0.00;
-				} else {
-					SLRLsd = roundDouble(sdDouble(array3),"#.##");
-				}
-			} else {
-				SLRLsd = 0.00;
-			}
-				
-			if (array4.length != 0){
-				if (array4.length == 1){
-					RDsd = 0.00;
-				} else {
-					RDsd = roundDouble(sdDouble(array4),"#.##");
-				}
-			} else {
-				RDsd = 0.00;
-			}
-			
-			// Write the SD values in the file
-			source = ""+";"+
-	    	 		 ""+";"+
-	    	 		 ""+";"+
-	    	 		 ""+";"+
-	    	 		 "SD"+";"+
-	    	 		 roundDouble(MRLsd,"#.##")+";"+
-	    	 		 roundDouble(NLRsd,"#.##")+";"+
-	    	 		 roundDouble(SLRLsd,"#.##")+";"+
-		 	 		 roundDouble(RDsd,"#.##")+"\r\n";
-				
-			newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-
-			// calculate the different SE values for accessions A,B,C,D
-			Double MRLse,NLRse,SLRLse,RDse;
-			
-			if (array1.length != 0){
-				if (array1.length == 1){
-					MRLse = 0.00;
-				} else {
-					MRLse = roundDouble((MRLsd/Math.sqrt(array1.length-1)),"#.##");
-				}
-			} else {
-				MRLse = 0.00;
-			}
-
-			if (array2.length != 0){	
-				if (array2.length == 1){
-					NLRse = 0.00;
-				} else {
-					NLRse = roundDouble((NLRsd/Math.sqrt(array2.length-1)),"#.##");
-				}
-			} else {
-				NLRse = 0.00;
-			}
-
-			if (array3.length != 0){
-				if (array3.length == 1){
-					SLRLse = 0.00;
-				} else {
-					SLRLse = roundDouble((SLRLsd/Math.sqrt(array3.length-1)),"#.##");
-				}
-			} else {
-				SLRLse = 0.00;
-			}
-				
-			if (array4.length != 0){
-				if (array4.length == 1){
-					RDse = 0.00;
-				} else {
-					RDse = roundDouble((RDsd/Math.sqrt(array4.length-1)),"#.##");
-				}
-			} else {
-				RDse = 0.00;
-			}
-
-			// Write the SE values in the file
-				
-			source = ""+";"+
-				     ""+";"+
-				     ""+";"+
-				     ""+";"+
-				     "SE"+";"+
-				     roundDouble(MRLse,"#.##")+";"+
-				     roundDouble(NLRse,"#.##")+";"+
-				     roundDouble(SLRLse,"#.##")+";"+
-				 	 roundDouble(RDse,"#.##")+"\r\n";
-
-			newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-				
-			// Write the data in the second file
-
-			source = accessionnames.get(i)+";"+
-					 concentration+";"+
-					 roundDouble(MRLmean,"#.##")+";"+"±"+";"+roundDouble(MRLse,"#.##")+";"+
-					 roundDouble(NLRmean,"#.##")+";"+"±"+";"+roundDouble(NLRse,"#.##")+";"+
-					 roundDouble(SLRLmean,"#.##")+";"+"±"+";"+roundDouble(SLRLse,"#.##")+";"+
-			 		 roundDouble(RDmean,"#.##")+";"+"±"+";"+roundDouble(RDse,"#.##")+";"+"\r\n";
-
-			newSource = source.replace(".", ",");			    
-			f2.write(newSource);
-								
-		}		
-		f1.close();
-		f2.close();
-	}
-	
-	private static void writeCorrectedFilesPerConcentration(String outputdir,
-			   									   			String concentration,
-			   									   			List<String> accessionnames,
-			   									   			List<Accession> accessionlist,
-			   									   			Double[] globalmeans) throws IOException{
-		
-		
-		// This routine writes a file with the corrected accessions values for a specific concentration
-		
-		String outputfilename1 = outputdir+"Accessions_02_"+concentration+"_corrected.csv";
-		String outputfilename2 = outputdir+"Accessions_03_"+concentration+"_corrected.csv";
-
-		FileWriter f1 = new FileWriter(outputfilename1);
-		FileWriter f2 = new FileWriter(outputfilename2);
-
-		// Write first line with the columns titles for the first file
-		String source = "Experiment Name"+";"+
-						"Accession"+";"+
-						"Concentration"+";"+
-						"Box Name"+";"+
-						""+";"+
-						"Main Root Length"+";"+
-						"Nb of Lateral Roots"+";"+
-						"Sum of Lateral Roots Length"+";"+
-						"Roots Density"+"\r\n";
-		
-		f1.write(source);
-
-		// Write first line with the columns titles for the second file
-		source = "Accession"+";"+
-				 "Concentration"+";"+
-				 "Main Root Length"+";"+";"+";"+
-				 "Nb of Lateral Roots"+";"+";"+";"+
-				 "Sum of Lateral Roots Length"+";"+";"+";"+
-		 		 "Roots Density"+";"+";"+";"+"\r\n";
-			
-		f2.write(source);
-
-		for (int i=0; i<accessionnames.size(); i++) {
-
-			Double MRLmeanA = 0.00,MRLmeanB = 0.00,MRLmeanC = 0.00,MRLmeanD = 0.00;
-			Double NLRmeanA = 0.00,NLRmeanB = 0.00,NLRmeanC = 0.00,NLRmeanD = 0.00;
-			Double SLRLmeanA = 0.00,SLRLmeanB = 0.00,SLRLmeanC = 0.00,SLRLmeanD = 0.00;
-			Double RDmeanA = 0.00,RDmeanB = 0.00,RDmeanC = 0.00,RDmeanD = 0.00;
-
-			for (int j=0; j<accessionlist.size(); j++) {
-				
-				// Get the corrected data for box A
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("A"))) {
-					
-					Double MRLmeanCorrected = (accessionlist.get(j).getMRLmean()/globalmeans[0])-1;
-					Double NLRmeanCorrected = (accessionlist.get(j).getNLRmean()/globalmeans[1])-1;
-					Double SLRLmeanCorrected = (accessionlist.get(j).getSLRLmean()/globalmeans[2])-1;
-					Double RDmeanCorrected = (accessionlist.get(j).getRDmean()/globalmeans[3])-1;
-					
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(MRLmeanCorrected,"#.##")+";"+
-							 roundDouble(NLRmeanCorrected,"#.##")+";"+
-							 roundDouble(SLRLmeanCorrected,"#.##")+";"+
-					 		 roundDouble(RDmeanCorrected,"#.##")+"\r\n";
-						
-//					 accessionlist.get(j).getNbOfPlants()+";"+
-
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-
-					MRLmeanA = roundDouble(MRLmeanCorrected,"#.##");
-					NLRmeanA = roundDouble(NLRmeanCorrected,"#.##");
-					SLRLmeanA = roundDouble(SLRLmeanCorrected,"#.##");
-					RDmeanA = roundDouble(RDmeanCorrected,"#.##");
-					
-					//System.out.println(MRLmeanA+" "+NLRmeanA+" "+SLRLmeanA);
-				}
-			}	
-
-			for (int j=0; j<accessionlist.size(); j++) {
-
-				// Get the corrected data for box B
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("B"))) {
-
-					Double MRLmeanCorrected = (accessionlist.get(j).getMRLmean()/globalmeans[0])-1;
-					Double NLRmeanCorrected = (accessionlist.get(j).getNLRmean()/globalmeans[1])-1;
-					Double SLRLmeanCorrected = (accessionlist.get(j).getSLRLmean()/globalmeans[2])-1;
-					Double RDmeanCorrected = (accessionlist.get(j).getRDmean()/globalmeans[3])-1;
-
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(MRLmeanCorrected,"#.##")+";"+
-							 roundDouble(NLRmeanCorrected,"#.##")+";"+
-							 roundDouble(SLRLmeanCorrected,"#.##")+";"+
-					 		 roundDouble(RDmeanCorrected,"#.##")+"\r\n";
-
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);	
-
-					MRLmeanB = roundDouble(MRLmeanCorrected,"#.##");
-					NLRmeanB = roundDouble(NLRmeanCorrected,"#.##");
-					SLRLmeanB = roundDouble(SLRLmeanCorrected,"#.##");
-					RDmeanB = roundDouble(RDmeanCorrected,"#.##");
-
-					//System.out.println(MRLmeanB+" "+NLRmeanB+" "+SLRLmeanB);
-
-				}
-			}	
-
-			for (int j=0; j<accessionlist.size(); j++) {
-
-				// Get the corrected data for box C
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("C"))) {
-
-					Double MRLmeanCorrected = (accessionlist.get(j).getMRLmean()/globalmeans[0])-1;
-					Double NLRmeanCorrected = (accessionlist.get(j).getNLRmean()/globalmeans[1])-1;
-					Double SLRLmeanCorrected = (accessionlist.get(j).getSLRLmean()/globalmeans[2])-1;
-					Double RDmeanCorrected = (accessionlist.get(j).getRDmean()/globalmeans[3])-1;
-
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(MRLmeanCorrected,"#.##")+";"+
-							 roundDouble(NLRmeanCorrected,"#.##")+";"+
-							 roundDouble(SLRLmeanCorrected,"#.##")+";"+
-					         roundDouble(RDmeanCorrected,"#.##")+"\r\n";
-						
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-
-					MRLmeanC = roundDouble(MRLmeanCorrected,"#.##");
-					NLRmeanC = roundDouble(NLRmeanCorrected,"#.##");
-					SLRLmeanC = roundDouble(SLRLmeanCorrected,"#.##");
-					RDmeanC = roundDouble(RDmeanCorrected,"#.##");
-
-					//System.out.println(MRLmeanC+" "+NLRmeanC+" "+SLRLmeanC);
-				}	
-			}
-
-			for (int j=0; j<accessionlist.size(); j++) {
-
-				// Get the corrected data for box D
-				if ((accessionnames.get(i).equals(accessionlist.get(j).getAccessionName())) &
-					(accessionlist.get(j).getConcentration().equals(concentration)) &
-					(accessionlist.get(j).getBox().equals("D"))) {
-
-					Double MRLmeanCorrected = (accessionlist.get(j).getMRLmean()/globalmeans[0])-1;
-					Double NLRmeanCorrected = (accessionlist.get(j).getNLRmean()/globalmeans[1])-1;
-					Double SLRLmeanCorrected = (accessionlist.get(j).getSLRLmean()/globalmeans[2])-1;
-					Double RDmeanCorrected = (accessionlist.get(j).getRDmean()/globalmeans[3])-1;
-
-					source = accessionlist.get(j).getExperimentName()+";"+
-							 accessionlist.get(j).getAccessionName()+";"+
-							 accessionlist.get(j).getConcentration()+";"+
-							 accessionlist.get(j).getBox()+";"+
-							 ""+";"+
-							 roundDouble(MRLmeanCorrected,"#.##")+";"+
-							 roundDouble(NLRmeanCorrected,"#.##")+";"+
-							 roundDouble(SLRLmeanCorrected,"#.##")+";"+
-					         roundDouble(RDmeanCorrected,"#.##")+"\r\n";
-
-					String newSource = source.replace(".", ",");			    
-					f1.write(newSource);
-
-					MRLmeanD = roundDouble(MRLmeanCorrected,"#.##");
-					NLRmeanD = roundDouble(NLRmeanCorrected,"#.##");
-					SLRLmeanD = roundDouble(SLRLmeanCorrected,"#.##");
-					RDmeanD = roundDouble(RDmeanCorrected,"#.##");
-
-					//System.out.println(MRLmeanD+" "+NLRmeanD+" "+SLRLmeanD);
-				}	
-			}
-			
-			//System.out.println(MRLmeanA+" "+NLRmeanA+" "+SLRLmeanA);
-			//System.out.println(MRLmeanB+" "+NLRmeanB+" "+SLRLmeanB);
-			//System.out.println(MRLmeanC+" "+NLRmeanC+" "+SLRLmeanC);
-			//System.out.println(MRLmeanD+" "+NLRmeanD+" "+SLRLmeanD);			
-			//System.out.println("---");
-
-			// move all the means to a specific array
-			Double[] array1 = moveToArray(MRLmeanA,MRLmeanB,MRLmeanC,MRLmeanD);		
-			Double[] array2 = moveToArray(NLRmeanA,NLRmeanB,NLRmeanC,NLRmeanD);
-			Double[] array3 = moveToArray(SLRLmeanA,SLRLmeanB,SLRLmeanC,SLRLmeanD);
-			Double[] array4 = moveToArray(RDmeanA,RDmeanB,RDmeanC,RDmeanD);
-			
-			//System.out.println(array1.length);
-			//System.out.println(array2.length);
-			//System.out.println(array3.length);			
-			//System.out.println("---");
-			
-			Double MRLmean,NLRmean,SLRLmean,RDmean;
-			
-			// Calculate MRLmean
-			if (array1.length != 0){
-				if (array1.length == 1){
-					MRLmean = array1[0];
-				} else {
-					MRLmean = roundDouble(meanDouble(array1),"#.##");
-				}
-			} else {
-				MRLmean = 0.00;
-			}
-
-			// Calculate NLRmean
-			if (array2.length != 0){
-				if (array2.length == 1){
-					NLRmean = array2[0];
-				} else {
-					NLRmean = roundDouble(meanDouble(array2),"#.##");				
-				}
-			} else {
-				NLRmean = 0.00;
-			}			
-
-			// Calculate SLRLmean
-			if (array3.length != 0){
-				if (array3.length == 1){
-					SLRLmean = array3[0];
-				} else {
-					SLRLmean = roundDouble(meanDouble(array3),"#.##");
-				}
-			} else {
-				SLRLmean = 0.00;
-			}
-
-			// Calculate RDmean
-			if (array4.length != 0){
-				if (array4.length == 1){
-					RDmean = array4[0];
-				} else {
-					RDmean = roundDouble(meanDouble(array4),"#.##");
-				}
-			} else {
-				RDmean = 0.00;
-			}
-			
-			// Write the Mean values in the file
-			source = ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 "Mean"+";"+
-					 roundDouble(MRLmean,"#.##")+";"+
-					 roundDouble(NLRmean,"#.##")+";"+
-					 roundDouble(SLRLmean,"#.##")+";"+
-			         roundDouble(RDmean,"#.##")+"\r\n";
-
-			String newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-
-			// calculate the different SD values for accessions A,B,C
-			Double MRLsd,NLRsd,SLRLsd,RDsd;
-
-			if (array1.length == 1 | array1.length == 0){
-					MRLsd = 0.00;
-			} else {
-				MRLsd = roundDouble(sdDouble(array1),"#.##");
-			}
-
-			if (array2.length == 1 | array2.length == 0){
-				NLRsd = 0.00;
-			} else {
-				NLRsd = roundDouble(sdDouble(array2),"#.##");
-			}
-
-			if (array3.length == 1 | array3.length == 0){
-				SLRLsd = 0.00;
-			} else {
-				SLRLsd = roundDouble(sdDouble(array3),"#.##");
-			}
-
-			if (array4.length == 1 | array4.length == 0){
-				RDsd = 0.00;
-			} else {
-				RDsd = roundDouble(sdDouble(array4),"#.##");
-			}
-
-			// Write the SD values in the file
-			source = ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 "SD"+";"+
-					 roundDouble(MRLsd,"#.##")+";"+
-					 roundDouble(NLRsd,"#.##")+";"+
-					 roundDouble(SLRLsd,"#.##")+";"+
-					 roundDouble(RDsd,"#.##")+"\r\n";
-
-			newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-
-			// calculate the different SE values for accessions A,B,C
-			Double MRLse,NLRse,SLRLse,RDse;
-
-			if (array1.length == 1 | array1.length == 0){
-				MRLse = 0.00;
-			} else {
-				MRLse = roundDouble((MRLsd/Math.sqrt(array1.length-1)),"#.##");
-			}
-
-			if (array2.length == 1 | array2.length == 0){
-				NLRse = 0.00;
-			} else {
-				NLRse = roundDouble((NLRsd/Math.sqrt(array2.length-1)),"#.##");
-			}
-
-			if (array3.length == 1 | array3.length == 0){
-				SLRLse = 0.00;
-			} else {
-				SLRLse = roundDouble((SLRLsd/Math.sqrt(array3.length-1)),"#.##");
-			}
-
-			if (array4.length == 1 | array4.length == 0){
-				RDse = 0.00;
-			} else {
-				RDse = roundDouble((RDsd/Math.sqrt(array4.length-1)),"#.##");
-			}
-
-			// Write the SE values in the file
-
-			source = ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 ""+";"+
-					 "SE"+";"+
-					 roundDouble(MRLse,"#.##")+";"+
-					 roundDouble(NLRse,"#.##")+";"+
-					 roundDouble(SLRLse,"#.##")+";"+
-					 roundDouble(RDse,"#.##")+"\r\n";
-
-			newSource = source.replace(".", ",");			    
-			f1.write(newSource);
-
-			// Write the data in the second file
-
-			source = accessionnames.get(i)+";"+
-					 concentration+";"+
-					 roundDouble(MRLmean,"#.##")+";"+"±"+";"+roundDouble(MRLse,"#.##")+";"+
-					 roundDouble(NLRmean,"#.##")+";"+"±"+";"+roundDouble(NLRse,"#.##")+";"+
-					 roundDouble(SLRLmean,"#.##")+";"+"±"+";"+roundDouble(SLRLse,"#.##")+";"+
-					 roundDouble(RDmean,"#.##")+";"+"±"+";"+roundDouble(RDse,"#.##")+";"+"\r\n";
-			newSource = source.replace(".", ",");			    
-			f2.write(newSource);
-
-		}		
-		f1.close();
-		f2.close();
-	}
+//	private static Double[] writeFile2(String outputfilename,
+//	 	  	                  List<Accession> accessionlist) throws IOException{
+//		
+//		FileWriter f1 = new FileWriter(outputfilename);
+//		
+//		// Write first line with the columns titles
+//		String source = "Experiment Name"+";"+
+//						"Accession"+";"+
+//						"Concentration"+";"+
+//						"Box Name"+";"+
+//						""+";"+
+//						"Main Root Length"+";"+
+//						"Nb of Lateral Roots"+";"+
+//						"Sum of Lateral Roots Length"+";"+
+//						"Roots Density"+"\r\n";
+//		
+//		f1.write(source);
+//
+//		// Write the file lines
+//		for (int i=0; i<accessionlist.size(); i++) {
+//			
+//			source = accessionlist.get(i).getExperimentName()+";"+
+//					 accessionlist.get(i).getAccessionName()+";"+
+//					 accessionlist.get(i).getConcentration()+";"+
+//					 accessionlist.get(i).getBox()+";"+
+//					 ""+";"+
+//					 roundDouble(accessionlist.get(i).getMRLmean(),"#.##")+";"+
+//					 roundDouble(accessionlist.get(i).getNLRmean(),"#.##")+";"+
+//					 roundDouble(accessionlist.get(i).getSLRLmean(),"#.##")+";"+
+//			 		 roundDouble(accessionlist.get(i).getRDmean(),"#.##")+"\r\n";
+//
+////			 accessionlist.get(i).getNbOfPlants()+";"+
+//
+//			
+//			// Just to make sure the numbers are OK for Excel
+//			String newSource = source.replace(".", ",");			    
+//			f1.write(newSource);
+//		}
+//
+//		Double[] globalMeans = new Double[4];			   
+//		globalMeans = calculateGlobalMeans(accessionlist);
+//		
+//		// Write a blank line
+//		source = ""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+"\r\n";
+//		f1.write(source);
+//		
+//		// Write the line with the global means
+//		source = ""+";"+
+//				 ""+";"+
+//				 ""+";"+
+//				 ""+";"+
+//				 "Mean"+";"+
+//				 roundDouble(globalMeans[0],"#.##")+";"+
+//				 roundDouble(globalMeans[1],"#.##")+";"+
+//				 roundDouble(globalMeans[2],"#.##")+";"+
+//		 		 roundDouble(globalMeans[3],"#.##")+"\r\n";
+//		
+//		// Just to make sure the numbers are OK for Excel
+//		String newSource = source.replace(".", ",");
+//		f1.write(newSource);
+//		
+//		f1.close();
+//		return globalMeans;
+//	}
 	
     private static String getStringLineItem(String line, int index, String patternstr) {
     	
@@ -1458,45 +681,24 @@ public class Analysis {
     return Math.sqrt( sum / ( n - 1 ) );
     }
 
-    static List<String> getUniqueAccessionsNames(List<Accession> list, String concentration) {
-    	
-    	// This routines returns a list with unique accession names per concentration
-    	
-    	List<String> uniqueNames = new ArrayList<String>();
-       	
-    	for (int i=0; i<list.size(); i++) {
-    		String currentName = list.get(i).getAccessionName();
-    		String currentConcentration = list.get(i).getConcentration();    		
-    		if (currentConcentration.equals(concentration)) {
-    			if (!uniqueNames.contains(currentName)){
-    			uniqueNames.add(currentName);
-    			//System.out.println(currentName);
-    			}
-    		}
-    	}	    	    	
-        return uniqueNames;
-    }    
-
-//    static List<String> getUniqueAccessionsNames(List<Accession> list) {
+//    static List<String> getUniqueAccessionsNames(List<Accession> list, String concentration) {
 //    	
-//    	// This routines returns a list with unique accession names
+//    	// This routines returns a list with unique accession names per concentration
 //    	
 //    	List<String> uniqueNames = new ArrayList<String>();
-//    
-//    	String currentName = list.get(0).getAccessionName();
-//    	uniqueNames.add(currentName);
-//    	//System.out.println(currentName);
-//    	
-//    	for (int i=1; i<list.size(); i++) {
-//    		if (!currentName.equals(list.get(i).getAccessionName())) {
-//    			currentName = list.get(i).getAccessionName();
-//    			//System.out.println(currentName);
+//       	
+//    	for (int i=0; i<list.size(); i++) {
+//    		String currentName = list.get(i).getAccessionName();
+//    		String currentConcentration = list.get(i).getConcentration();    		
+//    		if (currentConcentration.equals(concentration)) {
+//    			if (!uniqueNames.contains(currentName)){
 //    			uniqueNames.add(currentName);
+//    			//System.out.println(currentName);
+//    			}
 //    		}
 //    	}	    	    	
 //        return uniqueNames;
 //    }    
-
     
     static Double[] moveToArray(Double value1, Double value2, Double value3, Double value4) {
     	
@@ -1528,6 +730,5 @@ public class Analysis {
         return myArray;
     }
     
-
 }
 
