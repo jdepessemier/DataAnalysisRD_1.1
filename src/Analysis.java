@@ -68,15 +68,7 @@ public class Analysis {
 			
 		    // Write final file #1 
 		    String outFileName = finalDir+"Accessions_01.csv";
-		    
-		    // Compute from all the data parsed the global means
-		    // globalMeans[0] is for the Main Root Length
-		    // globalMeans[1] is for the Number of Lateral Roots
-		    // globalMeans[2] is for the Sum of Lateral Roots Length
-		    // globalMeans[3] is for the roots Density
-		    
-//		    Double[] globalMeans = new Double[4];
-//		    globalMeans = writeFile2(outFileName,accessionsList);		    	    
+		    writeFile1(outFileName,accessionsList);		    	    
 			
 		}				
 	}
@@ -460,70 +452,50 @@ public class Analysis {
 		return parsedaccession;
 	}
 
-//	private static Double[] writeFile2(String outputfilename,
-//	 	  	                  List<Accession> accessionlist) throws IOException{
-//		
-//		FileWriter f1 = new FileWriter(outputfilename);
-//		
-//		// Write first line with the columns titles
-//		String source = "Experiment Name"+";"+
-//						"Accession"+";"+
-//						"Concentration"+";"+
-//						"Box Name"+";"+
-//						""+";"+
-//						"Main Root Length"+";"+
-//						"Nb of Lateral Roots"+";"+
-//						"Sum of Lateral Roots Length"+";"+
-//						"Roots Density"+"\r\n";
-//		
-//		f1.write(source);
-//
-//		// Write the file lines
-//		for (int i=0; i<accessionlist.size(); i++) {
-//			
-//			source = accessionlist.get(i).getExperimentName()+";"+
-//					 accessionlist.get(i).getAccessionName()+";"+
-//					 accessionlist.get(i).getConcentration()+";"+
-//					 accessionlist.get(i).getBox()+";"+
-//					 ""+";"+
-//					 roundDouble(accessionlist.get(i).getMRLmean(),"#.##")+";"+
-//					 roundDouble(accessionlist.get(i).getNLRmean(),"#.##")+";"+
-//					 roundDouble(accessionlist.get(i).getSLRLmean(),"#.##")+";"+
-//			 		 roundDouble(accessionlist.get(i).getRDmean(),"#.##")+"\r\n";
-//
-////			 accessionlist.get(i).getNbOfPlants()+";"+
-//
-//			
-//			// Just to make sure the numbers are OK for Excel
-//			String newSource = source.replace(".", ",");			    
-//			f1.write(newSource);
-//		}
-//
-//		Double[] globalMeans = new Double[4];			   
-//		globalMeans = calculateGlobalMeans(accessionlist);
-//		
-//		// Write a blank line
-//		source = ""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+";"+""+"\r\n";
-//		f1.write(source);
-//		
-//		// Write the line with the global means
-//		source = ""+";"+
-//				 ""+";"+
-//				 ""+";"+
-//				 ""+";"+
-//				 "Mean"+";"+
-//				 roundDouble(globalMeans[0],"#.##")+";"+
-//				 roundDouble(globalMeans[1],"#.##")+";"+
-//				 roundDouble(globalMeans[2],"#.##")+";"+
-//		 		 roundDouble(globalMeans[3],"#.##")+"\r\n";
-//		
-//		// Just to make sure the numbers are OK for Excel
-//		String newSource = source.replace(".", ",");
-//		f1.write(newSource);
-//		
-//		f1.close();
-//		return globalMeans;
-//	}
+	private static void writeFile1(String outputfilename,
+	 	  	                  List<Accession> accessionlist) throws IOException{
+		
+		FileWriter f1 = new FileWriter(outputfilename);
+		
+		// Write the file lines
+		String source="";
+		
+		for (int j = 0; j < accessionlist.size(); j++ ){
+			String name= "";
+			String concentration="";
+			Double MRL=0.0;
+			Double NLR=0.0;
+			Double SLRL=0.0;
+			Double RD=0.0;
+			
+			for (int l = 0; l < accessionlist.get(j).getNbOfPlants(); l++ ){
+				name = accessionlist.get(j).getName();
+				concentration = accessionlist.get(j).getConcentration();
+				MRL = MRL + accessionlist.get(j).getMRL(l);
+				NLR = NLR + accessionlist.get(j).getNLR(l);
+				SLRL = SLRL + accessionlist.get(j).getSLRL(l);
+				RD = RD + accessionlist.get(j).getRD(l);
+			}	
+			
+			MRL = MRL/accessionlist.get(j).getNbOfPlants();
+			NLR = NLR/accessionlist.get(j).getNbOfPlants();
+			SLRL = SLRL/accessionlist.get(j).getNbOfPlants();
+			RD = RD/accessionlist.get(j).getNbOfPlants();
+			
+			source = name+";"+
+					 concentration+";"+
+					 roundDouble(MRL,"#.##")+";"+
+					 roundDouble(NLR,"#.##")+";"+
+					 roundDouble(SLRL,"#.##")+";"+
+			 		 roundDouble(RD,"#.##")+"\r\n";
+			
+			// Just to make sure the numbers are OK for Excel
+			String newSource = source.replace(".", ",");			    
+			f1.write(newSource);
+		}
+				
+		f1.close();
+	}
 	
     private static String getStringLineItem(String line, int index, String patternstr) {
     	
@@ -680,26 +652,7 @@ public class Analysis {
     // Change to ( n - 1 ) to n if you have complete data instead of a sample.
     return Math.sqrt( sum / ( n - 1 ) );
     }
-
-//    static List<String> getUniqueAccessionsNames(List<Accession> list, String concentration) {
-//    	
-//    	// This routines returns a list with unique accession names per concentration
-//    	
-//    	List<String> uniqueNames = new ArrayList<String>();
-//       	
-//    	for (int i=0; i<list.size(); i++) {
-//    		String currentName = list.get(i).getAccessionName();
-//    		String currentConcentration = list.get(i).getConcentration();    		
-//    		if (currentConcentration.equals(concentration)) {
-//    			if (!uniqueNames.contains(currentName)){
-//    			uniqueNames.add(currentName);
-//    			//System.out.println(currentName);
-//    			}
-//    		}
-//    	}	    	    	
-//        return uniqueNames;
-//    }    
-    
+   
     static Double[] moveToArray(Double value1, Double value2, Double value3, Double value4) {
     	
     	// Moves the 4 Doubles received as input into one array
