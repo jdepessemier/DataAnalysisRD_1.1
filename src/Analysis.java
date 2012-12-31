@@ -68,7 +68,26 @@ public class Analysis {
 			
 		    // Write final file #1 
 		    String outFileName = finalDir+"Accessions_01.csv";
-		    writeFile1(outFileName,accessionsList);		    	    
+		    writeFile1(outFileName,accessionsList);		
+		    
+		    // Get accessions means List
+		    File inFile1 = new File(finalDir+"Accessions_01.csv");
+		    List<AccessionMeans> accessionMeansList = new ArrayList<AccessionMeans>();
+		    
+		    accessionMeansList = getAccessionMeansList(inFile1);
+		    
+//		    for (int j = 0; j < accessionMeansList.size(); j++ ){
+//		    	System.out.println(accessionMeansList.get(j).getName());
+//		        System.out.println(accessionMeansList.get(j).getConcentration());
+//		        System.out.println(accessionMeansList.get(j).getMRL());
+//		        System.out.println(accessionMeansList.get(j).getNLR());
+//		        System.out.println(accessionMeansList.get(j).getSLRL());
+//		        System.out.println(accessionMeansList.get(j).getRD());
+//		    }
+		    
+		    // Write final file #2 
+		    outFileName = finalDir+"Accessions_02.csv";
+		    writeFile2(outFileName,accessionMeansList);	  
 			
 		}				
 	}
@@ -453,14 +472,13 @@ public class Analysis {
 	}
 
 	private static void writeFile1(String outputfilename,
-	 	  	                  List<Accession> accessionlist) throws IOException{
+	 	  	                  List<Accession> accessionlist) throws IOException{	
 		
 		FileWriter f1 = new FileWriter(outputfilename);
-		
-		// Write the file lines
 		String source="";
 		
 		for (int j = 0; j < accessionlist.size(); j++ ){
+			
 			String name= "";
 			String concentration="";
 			Double MRL=0.0;
@@ -475,7 +493,7 @@ public class Analysis {
 				NLR = NLR + accessionlist.get(j).getNLR(l);
 				SLRL = SLRL + accessionlist.get(j).getSLRL(l);
 				RD = RD + accessionlist.get(j).getRD(l);
-			}	
+			}
 			
 			MRL = MRL/accessionlist.get(j).getNbOfPlants();
 			NLR = NLR/accessionlist.get(j).getNbOfPlants();
@@ -484,18 +502,162 @@ public class Analysis {
 			
 			source = name+";"+
 					 concentration+";"+
-					 roundDouble(MRL,"#.##")+";"+
-					 roundDouble(NLR,"#.##")+";"+
-					 roundDouble(SLRL,"#.##")+";"+
-			 		 roundDouble(RD,"#.##")+"\r\n";
+				     roundDouble(MRL,"#.##")+";"+
+				     roundDouble(NLR,"#.##")+";"+
+				     roundDouble(SLRL,"#.##")+";"+
+				     roundDouble(RD,"#.##")+"\r\n";
 			
 			// Just to make sure the numbers are OK for Excel
 			String newSource = source.replace(".", ",");			    
 			f1.write(newSource);
+			
 		}
 				
 		f1.close();
 	}
+
+	private static List<AccessionMeans> getAccessionMeansList(File infile){
+		
+		FileInputStream fis = null;
+		BufferedInputStream bis = null;
+		DataInputStream dis = null;
+		
+		// variables to store the data
+		String accession;
+		String concentration;
+		Double MRL=0.0;
+		Double NLR=0.0;
+		Double SLRL=0.0;
+		Double RD=0.0;
+		
+		List<AccessionMeans> myAccessionMeansList = new ArrayList<AccessionMeans>();
+		
+		try {
+			fis = new FileInputStream(infile);
+		    bis = new BufferedInputStream(fis);
+		    dis = new DataInputStream(bis);
+		    
+		    
+		    
+		    while (dis.available() != 0) {
+		    	   	
+		    	String line = dis.readLine();
+		    	
+		    	accession = getStringLineItem(line,0,";");
+		    	concentration = getStringLineItem(line,1,";");
+		    	MRL = getDoubleLineItem(line,2,";");
+		    	NLR = getDoubleLineItem(line,3,";");
+		    	SLRL = getDoubleLineItem(line,4,";");
+		    	RD = getDoubleLineItem(line,5,";");
+		    	
+		    	AccessionMeans myAccessionMeans = new AccessionMeans();
+		    	
+		    	myAccessionMeans.setName(accession);
+		    	myAccessionMeans.setConcentration(concentration);
+		    	myAccessionMeans.setMRL(MRL);
+		    	myAccessionMeans.setNLR(NLR);
+		    	myAccessionMeans.setSLRL(SLRL);
+		    	myAccessionMeans.setRD(RD);
+		    	
+		    	myAccessionMeansList.add(myAccessionMeans);	 
+		    		    	
+		    }
+		    
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+
+		return myAccessionMeansList;
+	}
+	
+	private static void writeFile2(String outputfilename,
+               List<AccessionMeans> accessionMeansList) throws IOException{
+		
+				List<Accession> myAccessionNamesList = new ArrayList<Accession>();
+		String currentName="";
+		String name="";
+		
+		for (int j = 0; j < accessionMeansList.size(); j++ ){
+			name = accessionMeansList.get(j).getName();
+			if (!(name.equals(currentName))) {
+				Accession myAccessionNames = new Accession();
+				myAccessionNames.setName(name);
+				myAccessionNamesList.add(myAccessionNames);
+				currentName=name;
+			}
+		}
+			
+//		for (int j = 0; j < myAccessionNamesList.size(); j++ ){
+//			System.out.println(myAccessionNamesList.get(j).getName());
+//		}
+			
+		FileWriter f1 = new FileWriter(outputfilename);
+		String source="";
+		String LOW = "10µM";
+		String HIGH = "10mM";
+		
+
+		List<AccessionMeans> toSaveAccessionMeansList = new ArrayList<AccessionMeans>();
+			
+		for (int j = 0; j < myAccessionNamesList.size(); j++ ){
+			String currentAccessionName = myAccessionNamesList.get(j).getName();
+			AccessionMeans myAccessionMeans = new AccessionMeans();
+			myAccessionMeans.setName(currentAccessionName);
+			for (int k = 0; k < accessionMeansList.size(); k++ ){
+				String accessionMeansName = accessionMeansList.get(k).getName();
+				String concentration = accessionMeansList.get(k).getConcentration();
+				if (currentAccessionName.equals(accessionMeansName)){
+					if (concentration.equals(LOW)) {
+						myAccessionMeans.setMRLlow(accessionMeansList.get(k).getMRL());
+						myAccessionMeans.setNLRlow(accessionMeansList.get(k).getNLR());
+						myAccessionMeans.setSLRLlow(accessionMeansList.get(k).getSLRL());
+						myAccessionMeans.setRDlow(accessionMeansList.get(k).getRD());					
+					} else {
+						myAccessionMeans.setMRLhigh(accessionMeansList.get(k).getMRL());
+						myAccessionMeans.setNLRhigh(accessionMeansList.get(k).getNLR());
+						myAccessionMeans.setSLRLhigh(accessionMeansList.get(k).getSLRL());
+						myAccessionMeans.setRDhigh(accessionMeansList.get(k).getRD());
+					}
+				}
+			}
+			toSaveAccessionMeansList.add(myAccessionMeans);
+		}
+		
+		// Write first line with the columns titles
+		source = "Accession"+";"+
+				 "MRL (low)"+";"+
+				 "NLR (low)"+";"+
+				 "LRL (low)"+";"+
+				 "R Density (low)"+";"+
+				 "MRL (High)"+";"+
+				 "NLR (High)"+";"+
+				 "LRL (High)"+";"+
+				 "R Density (High)"+"\r\n";	
+		
+		f1.write(source);
+						
+		for (int j = 0; j < toSaveAccessionMeansList.size(); j++ ){
+			
+			source = toSaveAccessionMeansList.get(j).getName()+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getMRLlow(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getNLRlow(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getSLRLlow(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getRDlow(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getMRLhigh(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getNLRhigh(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getSLRLhigh(),"#.##")+";"+
+					 roundDouble(toSaveAccessionMeansList.get(j).getRDhigh(),"#.##")+"\r\n";
+
+			// Just to make sure the numbers are OK for Excel
+			String newSource = source.replace(".", ",");			    
+			f1.write(newSource);
+		}
+
+		f1.close();
+	}	
+	
 	
     private static String getStringLineItem(String line, int index, String patternstr) {
     	
