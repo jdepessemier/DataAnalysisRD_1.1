@@ -19,7 +19,7 @@ public class Analysis {
 		// secondary root
 		
 		String root = "C:";
-		String workDir = "W_2013_03_09";
+		String workDir = "W_2013_03_18";
 		Double minLateralRootLength = 0.1;
 		
 		// Setup the working directories inside the main directory
@@ -47,8 +47,8 @@ public class Analysis {
 			    //System.out.println(accession);
 			    
 			    // Build the different file names
-			    //String inputFileName = inputDir+accession+".bmp.txt";
-			    String inputFileName = inputDir+accession+".txt";
+			    String inputFileName = inputDir+accession+".bmp.txt";
+			    //String inputFileName = inputDir+accession+".txt";
 				String cleanupFileName = cleanupDir+accession+".txt";
 				String outputFileName = outputDir+accession+".csv";
 				
