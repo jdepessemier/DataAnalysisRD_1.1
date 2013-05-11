@@ -2,6 +2,7 @@ public class AccessionMeans {
 	
 	private String name;
 	private String concentration;
+	private String box;
 	private Double MRL;
 	private Double NLR;
 	private Double SLRL;
@@ -18,6 +19,7 @@ public class AccessionMeans {
 	public AccessionMeans() {
 		name = "";
 		concentration = "";
+		box = "";
 		MRL = 0.00;
 		NLR = 0.00;
 		SLRL = 0.00;
@@ -34,6 +36,7 @@ public class AccessionMeans {
 	
 	public AccessionMeans(String name,
 						  String concentration,
+						  String box,
 						  Double MRL,
 						  Double NLR,
 						  Double SLRL,
@@ -48,6 +51,7 @@ public class AccessionMeans {
 						  Double RDhigh) {
 		this.name = name;
 		this.concentration = concentration;
+		this.box = box;
 		this.MRL = MRL;
 		this.NLR = NLR;
 		this.SLRL = SLRL;
@@ -76,6 +80,14 @@ public class AccessionMeans {
 
 	public void setConcentration(String value) {
 		concentration = value;
+	}
+	
+	public String getBox(){
+		return box;
+	}
+
+	public void setBox(String value) {
+		box = value;
 	}
 
 	public Double getMRL() {

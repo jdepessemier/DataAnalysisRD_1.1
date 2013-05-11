@@ -19,7 +19,7 @@ public class Analysis {
 		// secondary root
 		
 		String root = "C:";
-		String workDir = "W_2013_03_18";
+		String workDir = "W_2012_03_22-08";
 		Double minLateralRootLength = 0.1;
 		
 		// Setup the working directories inside the main directory
@@ -68,27 +68,21 @@ public class Analysis {
 			
 		    // Write final file #1 
 		    String outFileName = finalDir+"Accessions_01.csv";
-		    writeFile1(outFileName,accessionsList);		
+		    writeFile1(outFileName,accessionsList);	
 		    
-		    // Get accessions means List
+		    // Write final file #2
 		    File inFile1 = new File(finalDir+"Accessions_01.csv");
-		    List<AccessionMeans> accessionMeansList = new ArrayList<AccessionMeans>();
-		    
-		    accessionMeansList = getAccessionMeansList(inFile1);
-		    
-//		    for (int j = 0; j < accessionMeansList.size(); j++ ){
-//		    	System.out.println(accessionMeansList.get(j).getName());
-//		        System.out.println(accessionMeansList.get(j).getConcentration());
-//		        System.out.println(accessionMeansList.get(j).getMRL());
-//		        System.out.println(accessionMeansList.get(j).getNLR());
-//		        System.out.println(accessionMeansList.get(j).getSLRL());
-//		        System.out.println(accessionMeansList.get(j).getRD());
-//		    }
-		    
-		    // Write final file #2 
+		    List<AccessionSummary> mainAccessionSummaryList = new ArrayList<AccessionSummary>();
+		    mainAccessionSummaryList = getAccessionSummaryList(inFile1);	    
 		    outFileName = finalDir+"Accessions_02.csv";
-		    writeFile2(outFileName,accessionMeansList);	  
-			
+		    writeFile2(outFileName,mainAccessionSummaryList);		    
+		    
+		    // Write final file #3
+		    File inFile2 = new File(finalDir+"Accessions_02.csv");
+		    List<AccessionMeans> accessionMeansListPerBox = new ArrayList<AccessionMeans>();	    
+		    accessionMeansListPerBox = getAccessionMeansListPerBox(inFile2);    
+		    outFileName = finalDir+"Accessions_High_Low.csv";
+		    writeFile3(outFileName,accessionMeansListPerBox);	  			
 		}				
 	}
 
@@ -484,6 +478,8 @@ public class Analysis {
 			
 			String name= "";
 			String concentration="";
+			String box="";
+			int nbOfPlants=0;
 			Double MRL=0.0;
 			Double NLR=0.0;
 			Double SLRL=0.0;
@@ -492,6 +488,8 @@ public class Analysis {
 			for (int l = 0; l < accessionlist.get(j).getNbOfPlants(); l++ ){
 				name = accessionlist.get(j).getName();
 				concentration = accessionlist.get(j).getConcentration();
+				box = accessionlist.get(j).getBox();
+				nbOfPlants = accessionlist.get(j).getNbOfPlants();
 				MRL = MRL + accessionlist.get(j).getMRL(l);
 				NLR = NLR + accessionlist.get(j).getNLR(l);
 				SLRL = SLRL + accessionlist.get(j).getSLRL(l);
@@ -505,6 +503,8 @@ public class Analysis {
 			
 			source = name+";"+
 					 concentration+";"+
+					 nbOfPlants+";"+
+					 box+";"+
 				     roundDouble(MRL,"#.##")+";"+
 				     roundDouble(NLR,"#.##")+";"+
 				     roundDouble(SLRL,"#.##")+";"+
@@ -518,8 +518,524 @@ public class Analysis {
 				
 		f1.close();
 	}
+	
+	private static void writeFile2(String outputfilename,List<AccessionSummary> mainAccessionSummaryList) throws IOException{	
+			
+		List<AccessionSummary> accessionSummaryList_A  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_B  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_C  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_D  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_E  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_F  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_G  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_H  = new ArrayList<AccessionSummary>();
+		List<AccessionSummary> accessionSummaryList_I  = new ArrayList<AccessionSummary>();
+		
+		List<AccessionSummary> accessionSummaryListFinal  = new ArrayList<AccessionSummary>();
+			
+		// Get the list of all unique accessions names ------------------------------------------------------------------
+		List<Accession> accessionNamesList = new ArrayList<Accession>();
+		String currentAccessionName="";
+		String accessionName="";
 
-	private static List<AccessionMeans> getAccessionMeansList(File infile){
+		for (int j = 0; j < mainAccessionSummaryList.size(); j++ ){
+			accessionName = mainAccessionSummaryList.get(j).getName();
+			if (!(accessionName.equals(currentAccessionName))) {
+				Accession myAccessionName = new Accession();
+				myAccessionName.setName(accessionName);
+				accessionNamesList.add(myAccessionName);
+				currentAccessionName=accessionName;
+			}
+		}
+		
+//		// Debug
+//	    for (int l = 0; l < accessionNamesList.size(); l++ ){
+//	    	System.out.println(accessionNamesList.get(l).getName());
+//	    }	
+	    
+	    // Set the list of concentrations -------------------------------------------------------------------------------
+	    List<Concentration> concentrationList = new ArrayList<Concentration>();
+		Concentration concentration_10mM = new Concentration("10mM");
+		concentrationList.add(concentration_10mM);
+		Concentration concentration_10µM = new Concentration("10µM");
+		concentrationList.add(concentration_10µM);
+		
+//		// Debug
+//	    for (int l = 0; l < concentrationList.size(); l++ ){
+//	    	System.out.println(concentrationList.get(l).getName());
+//	    }
+	    
+		String name= "";
+		String concentration="";
+		String box="";
+		int nbofplants=0;
+		Double MRL=0.0;
+		Double NLR=0.0;
+		Double SLRL=0.0;
+		Double RD=0.0;
+			
+		// Sort the accessions per boxes - A,B,C,D,E,F,G,H,I -------------------------------------------------------------
+		for (int j = 0; j < mainAccessionSummaryList.size(); j++ ){
+			
+			name = mainAccessionSummaryList.get(j).getName();
+			concentration = mainAccessionSummaryList.get(j).getConcentration();
+			box = mainAccessionSummaryList.get(j).getBox();
+			nbofplants = mainAccessionSummaryList.get(j).getNbOfPlants();
+			MRL = mainAccessionSummaryList.get(j).getMRL();
+			NLR = mainAccessionSummaryList.get(j).getNLR();
+			SLRL = mainAccessionSummaryList.get(j).getSLRL();
+			RD = mainAccessionSummaryList.get(j).getRD();
+			
+			if (box.equals("A")) {
+				AccessionSummary myAccessionSummary_A = new AccessionSummary();
+				myAccessionSummary_A.setName(name);
+				myAccessionSummary_A.setBox(box);
+				myAccessionSummary_A.setConcentration(concentration);
+				myAccessionSummary_A.setNbOfPlants(nbofplants);
+				myAccessionSummary_A.setMRL(MRL);
+				myAccessionSummary_A.setNLR(NLR);
+				myAccessionSummary_A.setSLRL(SLRL);
+				myAccessionSummary_A.setRD(RD);
+				accessionSummaryList_A.add(myAccessionSummary_A);
+			}
+			if (box.equals("B")) {
+				AccessionSummary myAccessionSummary_B = new AccessionSummary();
+				myAccessionSummary_B.setName(name);
+				myAccessionSummary_B.setBox(box);
+				myAccessionSummary_B.setConcentration(concentration);
+				myAccessionSummary_B.setNbOfPlants(nbofplants);
+				myAccessionSummary_B.setMRL(MRL);
+				myAccessionSummary_B.setNLR(NLR);
+				myAccessionSummary_B.setSLRL(SLRL);
+				myAccessionSummary_B.setRD(RD);
+				accessionSummaryList_B.add(myAccessionSummary_B);
+			}
+			if (box.equals("C")) {
+				AccessionSummary myAccessionSummary_C = new AccessionSummary();
+				myAccessionSummary_C.setName(name);
+				myAccessionSummary_C.setBox(box);
+				myAccessionSummary_C.setConcentration(concentration);
+				myAccessionSummary_C.setNbOfPlants(nbofplants);
+				myAccessionSummary_C.setMRL(MRL);
+				myAccessionSummary_C.setNLR(NLR);
+				myAccessionSummary_C.setSLRL(SLRL);
+				myAccessionSummary_C.setRD(RD);
+				accessionSummaryList_C.add(myAccessionSummary_C);
+			}
+			if (box.equals("D")) {
+				AccessionSummary myAccessionSummary_D = new AccessionSummary();
+				myAccessionSummary_D.setName(name);
+				myAccessionSummary_D.setBox(box);
+				myAccessionSummary_D.setConcentration(concentration);
+				myAccessionSummary_D.setNbOfPlants(nbofplants);
+				myAccessionSummary_D.setMRL(MRL);
+				myAccessionSummary_D.setNLR(NLR);
+				myAccessionSummary_D.setSLRL(SLRL);
+				myAccessionSummary_D.setRD(RD);
+				accessionSummaryList_D.add(myAccessionSummary_D);
+			}
+			if (box.equals("E")) {
+				AccessionSummary myAccessionSummary_E = new AccessionSummary();
+				myAccessionSummary_E.setName(name);
+				myAccessionSummary_E.setBox(box);
+				myAccessionSummary_E.setConcentration(concentration);
+				myAccessionSummary_E.setNbOfPlants(nbofplants);
+				myAccessionSummary_E.setMRL(MRL);
+				myAccessionSummary_E.setNLR(NLR);
+				myAccessionSummary_E.setSLRL(SLRL);
+				myAccessionSummary_E.setRD(RD);
+				accessionSummaryList_E.add(myAccessionSummary_E);
+			}
+			if (box.equals("F")) {
+				AccessionSummary myAccessionSummary_F = new AccessionSummary();
+				myAccessionSummary_F.setName(name);
+				myAccessionSummary_F.setBox(box);
+				myAccessionSummary_F.setConcentration(concentration);
+				myAccessionSummary_F.setNbOfPlants(nbofplants);
+				myAccessionSummary_F.setMRL(MRL);
+				myAccessionSummary_F.setNLR(NLR);
+				myAccessionSummary_F.setSLRL(SLRL);
+				myAccessionSummary_F.setRD(RD);
+				accessionSummaryList_F.add(myAccessionSummary_F);
+			}
+			if (box.equals("G")) {
+				AccessionSummary myAccessionSummary_G = new AccessionSummary();
+				myAccessionSummary_G.setName(name);
+				myAccessionSummary_G.setBox(box);
+				myAccessionSummary_G.setConcentration(concentration);
+				myAccessionSummary_G.setNbOfPlants(nbofplants);
+				myAccessionSummary_G.setMRL(MRL);
+				myAccessionSummary_G.setNLR(NLR);
+				myAccessionSummary_G.setSLRL(SLRL);
+				myAccessionSummary_G.setRD(RD);
+				accessionSummaryList_G.add(myAccessionSummary_G);
+			}
+			if (box.equals("H")) {
+				AccessionSummary myAccessionSummary_H = new AccessionSummary();
+				myAccessionSummary_H.setName(name);
+				myAccessionSummary_H.setBox(box);
+				myAccessionSummary_H.setConcentration(concentration);
+				myAccessionSummary_H.setNbOfPlants(nbofplants);
+				myAccessionSummary_H.setMRL(MRL);
+				myAccessionSummary_H.setNLR(NLR);
+				myAccessionSummary_H.setSLRL(SLRL);
+				myAccessionSummary_H.setRD(RD);
+				accessionSummaryList_H.add(myAccessionSummary_H);
+			}
+			if (box.equals("I")) {
+				AccessionSummary myAccessionSummary_I = new AccessionSummary();
+				myAccessionSummary_I.setName(name);
+				myAccessionSummary_I.setBox(box);
+				myAccessionSummary_I.setConcentration(concentration);
+				myAccessionSummary_I.setNbOfPlants(nbofplants);
+				myAccessionSummary_I.setMRL(MRL);
+				myAccessionSummary_I.setNLR(NLR);
+				myAccessionSummary_I.setSLRL(SLRL);
+				myAccessionSummary_I.setRD(RD);
+				accessionSummaryList_I.add(myAccessionSummary_I);
+			}
+		}	
+		
+		//Debug
+		System.out.println(accessionSummaryList_A.size()+" "+
+				   accessionSummaryList_B.size()+" "+
+				   accessionSummaryList_C.size()+" "+
+				   accessionSummaryList_D.size()+" "+
+				   accessionSummaryList_E.size()+" "+
+				   accessionSummaryList_F.size()+" "+
+				   accessionSummaryList_G.size()+" "+
+				   accessionSummaryList_H.size()+" "+
+				   accessionSummaryList_I.size());
+		
+		
+		// Loop in the unique accessions names, and by concentration combine the data ------------------------------------
+			
+		for (int i = 0; i < accessionNamesList.size(); i++ ){
+		
+			name = accessionNamesList.get(i).getName();
+			for (int j = 0; j < concentrationList.size(); j++ ){
+				
+				int totalNbOfPlants=0;
+				int nbOfPlantsA=0;
+				int nbOfPlantsB=0;
+				int nbOfPlantsC=0;
+				int nbOfPlantsD=0;				
+				int nbOfPlantsE=0;
+				int nbOfPlantsF=0;
+				int nbOfPlantsG=0;
+				int nbOfPlantsH=0;
+				int nbOfPlantsI=0;
+				Double MRLA=0.0;
+				Double MRLB=0.0;
+				Double MRLC=0.0;
+				Double MRLD=0.0;
+				Double MRLE=0.0;
+				Double MRLF=0.0;
+				Double MRLG=0.0;
+				Double MRLH=0.0;
+				Double MRLI=0.0;
+				Double NLRA=0.0;
+				Double NLRB=0.0;
+				Double NLRC=0.0;
+				Double NLRD=0.0;
+				Double NLRE=0.0;
+				Double NLRF=0.0;
+				Double NLRG=0.0;
+				Double NLRH=0.0;
+				Double NLRI=0.0;
+				Double SLRLA=0.0;
+				Double SLRLB=0.0;
+				Double SLRLC=0.0;
+				Double SLRLD=0.0;
+				Double SLRLE=0.0;
+				Double SLRLF=0.0;
+				Double SLRLG=0.0;
+				Double SLRLH=0.0;
+				Double SLRLI=0.0;
+				Double RDA=0.0;
+				Double RDB=0.0;
+				Double RDC=0.0;
+				Double RDD=0.0;
+				Double RDE=0.0;
+				Double RDF=0.0;
+				Double RDG=0.0;
+				Double RDH=0.0;
+				Double RDI=0.0;
+				
+				concentration = concentrationList.get(j).getName();
+				for (int k = 0; k < accessionSummaryList_A.size(); k++ ){
+					if (accessionSummaryList_A.get(k).getName().equals(name)) {
+						if (accessionSummaryList_A.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsA = accessionSummaryList_A.get(k).getNbOfPlants();
+							MRLA = MRLA + accessionSummaryList_A.get(k).getMRL()*nbOfPlantsA;
+							NLRA = NLRA + accessionSummaryList_A.get(k).getNLR()*nbOfPlantsA;
+							SLRLA = SLRLA + accessionSummaryList_A.get(k).getSLRL()*nbOfPlantsA;
+							RDA = RDA + accessionSummaryList_A.get(k).getRD()*nbOfPlantsA;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsA+" "+
+											   MRLA+" "+
+											   NLRA+" "+
+											   SLRLA+" "+
+											   RDA);
+							
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_B.size(); k++ ){
+					if (accessionSummaryList_B.get(k).getName().equals(name)) {
+						if (accessionSummaryList_B.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsB = accessionSummaryList_B.get(k).getNbOfPlants();
+							MRLB = MRLB + accessionSummaryList_B.get(k).getMRL()*nbOfPlantsB;
+							NLRB = NLRB + accessionSummaryList_B.get(k).getNLR()*nbOfPlantsB;
+							SLRLB = SLRLB + accessionSummaryList_B.get(k).getSLRL()*nbOfPlantsB;
+							RDB = RDB + accessionSummaryList_B.get(k).getRD()*nbOfPlantsB;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsB+" "+
+											   MRLB+" "+
+											   NLRB+" "+
+											   SLRLB+" "+
+											   RDB);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_C.size(); k++ ){
+					if (accessionSummaryList_C.get(k).getName().equals(name)) {
+						if (accessionSummaryList_C.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsC = accessionSummaryList_C.get(k).getNbOfPlants();
+							MRLC = MRLC + accessionSummaryList_C.get(k).getMRL()*nbOfPlantsC;
+							NLRC = NLRC + accessionSummaryList_C.get(k).getNLR()*nbOfPlantsC;
+							SLRLC = SLRLC + accessionSummaryList_C.get(k).getSLRL()*nbOfPlantsC;
+							RDC = RDC + accessionSummaryList_C.get(k).getRD()*nbOfPlantsC;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsC+" "+
+											   MRLC+" "+
+											   NLRC+" "+
+											   SLRLC+" "+
+											   RDC);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_D.size(); k++ ){
+					if (accessionSummaryList_D.get(k).getName().equals(name)) {
+						if (accessionSummaryList_D.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsD = accessionSummaryList_D.get(k).getNbOfPlants();
+							MRLD = MRLD + accessionSummaryList_D.get(k).getMRL()*nbOfPlantsD;
+							NLRD = NLRD + accessionSummaryList_D.get(k).getNLR()*nbOfPlantsD;
+							SLRLD = SLRLD + accessionSummaryList_D.get(k).getSLRL()*nbOfPlantsD;
+							RDD = RDD + accessionSummaryList_D.get(k).getRD()*nbOfPlantsD;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsD+" "+
+											   MRLD+" "+
+											   NLRD+" "+
+											   SLRLD+" "+
+											   RDD);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_E.size(); k++ ){
+					if (accessionSummaryList_E.get(k).getName().equals(name)) {
+						if (accessionSummaryList_E.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsE = accessionSummaryList_E.get(k).getNbOfPlants();
+							MRLE = MRLE + accessionSummaryList_E.get(k).getMRL()*nbOfPlantsE;
+							NLRE = NLRE + accessionSummaryList_E.get(k).getNLR()*nbOfPlantsE;
+							SLRLE = SLRLE + accessionSummaryList_E.get(k).getSLRL()*nbOfPlantsE;
+							RDE = RDE + accessionSummaryList_E.get(k).getRD()*nbOfPlantsE;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsE+" "+
+											   MRLE+" "+
+											   NLRE+" "+
+											   SLRLE+" "+
+											   RDE);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_F.size(); k++ ){
+					if (accessionSummaryList_F.get(k).getName().equals(name)) {
+						if (accessionSummaryList_F.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsF = accessionSummaryList_F.get(k).getNbOfPlants();
+							MRLF = MRLF + accessionSummaryList_F.get(k).getMRL()*nbOfPlantsF;
+							NLRF = NLRF + accessionSummaryList_F.get(k).getNLR()*nbOfPlantsF;
+							SLRLF = SLRLF + accessionSummaryList_F.get(k).getSLRL()*nbOfPlantsF;
+							RDF = RDF + accessionSummaryList_F.get(k).getRD()*nbOfPlantsF;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsF+" "+
+											   MRLF+" "+
+											   NLRF+" "+
+											   SLRLF+" "+
+											   RDF);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_G.size(); k++ ){
+					if (accessionSummaryList_G.get(k).getName().equals(name)) {
+						if (accessionSummaryList_G.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsG = accessionSummaryList_G.get(k).getNbOfPlants();
+							MRLG = MRLG + accessionSummaryList_G.get(k).getMRL()*nbOfPlantsG;
+							NLRG = NLRG + accessionSummaryList_G.get(k).getNLR()*nbOfPlantsG;
+							SLRLG = SLRLG + accessionSummaryList_G.get(k).getSLRL()*nbOfPlantsG;
+							RDG = RDG + accessionSummaryList_G.get(k).getRD()*nbOfPlantsG;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsG+" "+
+											   MRLG+" "+
+											   NLRG+" "+
+											   SLRLG+" "+
+											   RDG);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_H.size(); k++ ){
+					if (accessionSummaryList_H.get(k).getName().equals(name)) {
+						if (accessionSummaryList_H.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsH = accessionSummaryList_H.get(k).getNbOfPlants();
+							MRLH = MRLH + accessionSummaryList_H.get(k).getMRL()*nbOfPlantsH;
+							NLRH = NLRH + accessionSummaryList_H.get(k).getNLR()*nbOfPlantsH;
+							SLRLH = SLRLH + accessionSummaryList_H.get(k).getSLRL()*nbOfPlantsH;
+							RDH = RDH + accessionSummaryList_H.get(k).getRD()*nbOfPlantsH;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsH+" "+
+											   MRLH+" "+
+											   NLRH+" "+
+											   SLRLH+" "+
+											   RDH);
+						}
+					}
+				}
+				for (int k = 0; k < accessionSummaryList_I.size(); k++ ){
+					if (accessionSummaryList_I.get(k).getName().equals(name)) {
+						if (accessionSummaryList_I.get(k).getConcentration().equals(concentration)) {
+							nbOfPlantsI = accessionSummaryList_I.get(k).getNbOfPlants();
+							MRLI = MRLI + accessionSummaryList_I.get(k).getMRL()*nbOfPlantsI;
+							NLRI= NLRI + accessionSummaryList_I.get(k).getNLR()*nbOfPlantsI;
+							SLRLI = SLRLI + accessionSummaryList_I.get(k).getSLRL()*nbOfPlantsI;
+							RDI = RDI + accessionSummaryList_I.get(k).getRD()*nbOfPlantsI;
+							
+							//Debug
+							System.out.println(name+" "+
+											   concentration+" "+
+											   nbOfPlantsI+" "+
+											   MRLI+" "+
+											   NLRI+" "+
+											   SLRLI+" "+
+											   RDI);
+						}
+					}
+				}
+
+				
+				totalNbOfPlants = nbOfPlantsA + 
+								  nbOfPlantsB + 
+								  nbOfPlantsC +
+								  nbOfPlantsD +
+								  nbOfPlantsE +
+								  nbOfPlantsF +
+								  nbOfPlantsG +
+								  nbOfPlantsH +
+								  nbOfPlantsI;
+				
+				if (!(totalNbOfPlants==0)) {
+					MRL = (MRLA+MRLB+MRLC+MRLD+MRLE+MRLF+MRLG+MRLH+MRLI)/ totalNbOfPlants;
+					NLR = (NLRA+NLRB+NLRC+NLRD+NLRE+NLRF+NLRG+NLRH+NLRI)/ totalNbOfPlants;
+					SLRL = (SLRLA+SLRLB+SLRLC+SLRLD+SLRLE+SLRLF+SLRLG+SLRLH+SLRLI)/ totalNbOfPlants;
+					RD = (RDA+RDB+RDC+RDD+RDE+RDF+RDG+RDH+RDI)/ totalNbOfPlants;
+					
+					//Debug
+					System.out.println(name+" "+
+									   concentration+" "+
+									   totalNbOfPlants+" "+
+									   MRL+" "+
+									   NLR+" "+
+									   SLRL+" "+
+									   RD);
+					
+					AccessionSummary accessionSummaryFinal = new AccessionSummary();
+					accessionSummaryFinal.setName(name);
+					accessionSummaryFinal.setConcentration(concentration);
+					accessionSummaryFinal.setMRL(MRL);
+					accessionSummaryFinal.setNLR(NLR);
+					accessionSummaryFinal.setSLRL(SLRL);
+					accessionSummaryFinal.setRD(RD);
+					accessionSummaryListFinal.add(accessionSummaryFinal);				
+				}
+			}
+		}
+		
+		// Debug
+		System.out.println(accessionSummaryListFinal.size());
+	    for (int l = 0; l < accessionSummaryListFinal.size(); l++ ){
+	    	System.out.println(accessionSummaryListFinal.get(l).getName()+" "+
+	    			           accessionSummaryListFinal.get(l).getConcentration());
+	    }
+	    
+	    // Write the file
+	    FileWriter f1 = new FileWriter(outputfilename);
+		String source="";
+		String currentName="";
+		String currentConcentration="";
+		Double currentMRL=0.0;
+		Double currentNLR=0.0;
+		Double currentSLRL=0.0;
+		Double currentRD=0.0;
+		
+	    for (int l = 0; l < accessionSummaryListFinal.size(); l++ ){
+	    	currentName = accessionSummaryListFinal.get(l).getName();
+	    	currentConcentration = accessionSummaryListFinal.get(l).getConcentration();
+	    	currentMRL = accessionSummaryListFinal.get(l).getMRL();
+	    	currentNLR = accessionSummaryListFinal.get(l).getNLR();
+	    	currentSLRL = accessionSummaryListFinal.get(l).getSLRL();
+	    	currentRD = accessionSummaryListFinal.get(l).getRD();
+	    	
+	    	source = currentName+";"+
+	    			 currentConcentration+";"+
+					 roundDouble(currentMRL,"#.##")+";"+
+					 roundDouble(currentNLR,"#.##")+";"+
+					 roundDouble(currentSLRL,"#.##")+";"+
+					 roundDouble(currentRD,"#.##")+"\r\n";
+
+			// Debug
+		    System.out.println(currentName+";"+
+	    			 currentConcentration+";"+
+					 roundDouble(currentMRL,"#.##")+";"+
+					 roundDouble(currentNLR,"#.##")+";"+
+					 roundDouble(currentSLRL,"#.##")+";"+
+					 roundDouble(currentRD,"#.##"));
+			
+			String newSource = source.replace(".", ",");
+			f1.write(newSource);
+	    }
+
+//		//Debug
+//    	System.out.println(accessionSummaryList_A.size());
+//    	System.out.println(accessionSummaryList_B.size());
+//    	System.out.println(accessionSummaryList_C.size());
+    	
+		f1.close();
+	}	
+
+	private static List<AccessionMeans> getAccessionMeansListPerBox(File infile){
 		
 		FileInputStream fis = null;
 		BufferedInputStream bis = null;
@@ -573,9 +1089,69 @@ public class Analysis {
 		}	
 
 		return myAccessionMeansList;
-	}
+	}	
 	
-	private static void writeFile2(String outputfilename,
+	private static List<AccessionSummary> getAccessionSummaryList(File infile){
+		
+		FileInputStream fis = null;
+		BufferedInputStream bis = null;
+		DataInputStream dis = null;
+		
+		// variables to store the data
+		String accession;
+		String concentration;
+		String box;
+		int nbofplants;
+		Double MRL=0.0;
+		Double NLR=0.0;
+		Double SLRL=0.0;
+		Double RD=0.0;
+		
+		List<AccessionSummary> myAccessionSummaryList = new ArrayList<AccessionSummary>();
+		
+		try {
+			fis = new FileInputStream(infile);
+		    bis = new BufferedInputStream(fis);
+		    dis = new DataInputStream(bis);
+		    
+		    while (dis.available() != 0) {
+		    	   	
+		    	String line = dis.readLine();
+		    	
+		    	accession = getStringLineItem(line,0,";");
+		    	concentration = getStringLineItem(line,1,";");
+		    	nbofplants = getIntegerLineItem(line,2,";");
+		    	box = getStringLineItem(line,3,";");
+		    	MRL = getDoubleLineItem(line,4,";");
+		    	NLR = getDoubleLineItem(line,5,";");
+		    	SLRL = getDoubleLineItem(line,6,";");
+		    	RD = getDoubleLineItem(line,7,";");
+		    	
+		    	AccessionSummary myAccessionSummary = new AccessionSummary();
+		    	
+		    	myAccessionSummary.setName(accession);
+		    	myAccessionSummary.setConcentration(concentration);
+		    	myAccessionSummary.setBox(box);
+		    	myAccessionSummary.setNbOfPlants(nbofplants);
+		    	myAccessionSummary.setMRL(MRL);
+		    	myAccessionSummary.setNLR(NLR);
+		    	myAccessionSummary.setSLRL(SLRL);
+		    	myAccessionSummary.setRD(RD);
+		    	
+		    	myAccessionSummaryList.add(myAccessionSummary);	 
+		    		    	
+		    }
+		    
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+
+		return myAccessionSummaryList;
+	}	
+	
+	private static void writeFile3(String outputfilename,
                List<AccessionMeans> accessionMeansList) throws IOException{
 		
 				List<Accession> myAccessionNamesList = new ArrayList<Accession>();
